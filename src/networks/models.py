@@ -9,80 +9,134 @@ def hidden_init(layer):
   lim = 1. / np.sqrt(fan_in)
   return (-lim, lim)
 
+import torch.autograd as autograd 
+USE_CUDA = torch.cuda.is_available()
+Variable = lambda *args, **kwargs: autograd.Variable(*args, **kwargs).cuda() if USE_CUDA else autograd.Variable(*args, **kwargs)
 
 class NoisyLinear(nn.Module):
-  def __init__(self, feat_in, feat_out, std_init=0.4):
+  def __init__(self, in_features, out_features, std_init=0.4):
     super(NoisyLinear, self).__init__()
-
-    self.std_init = std_init
-    self.feat_in = feat_in
-    self.feat_out = feat_out
-
-    # The weights and biases (mu)
-    self.weights_mu = nn.Parameter(torch.empty(feat_out, feat_in))
-    self.bias_mu = nn.Parameter(torch.empty(feat_out))
-
-    # The weights for noise to scale (sigma)
-    self.weights_sigma = nn.Parameter(torch.empty(feat_out, feat_in))
-    self.bias_sigma = nn.Parameter(torch.empty(feat_out))
-
-    # Buffer to hold noise created
-    self.register_buffer('weights_eps', torch.empty(feat_out, feat_in))
-    self.register_buffer('bias_eps', torch.empty(feat_out))
-
-    # Reset Parameters
+    
+    self.in_features  = in_features
+    self.out_features = out_features
+    self.std_init     = std_init
+    
+    self.weight_mu    = nn.Parameter(torch.FloatTensor(out_features, in_features))
+    self.weight_sigma = nn.Parameter(torch.FloatTensor(out_features, in_features))
+    self.register_buffer('weight_epsilon', torch.FloatTensor(out_features, in_features))
+    
+    self.bias_mu    = nn.Parameter(torch.FloatTensor(out_features))
+    self.bias_sigma = nn.Parameter(torch.FloatTensor(out_features))
+    self.register_buffer('bias_epsilon', torch.FloatTensor(out_features))
+    
     self.reset_parameters()
     self.sample_noise()
-
-  '''
-  3.2 Initialisation of Noisy Network - using factorised noisy networks
-  - Each element mu is initilased from a uniform distribution U(-1/sqrt(p) , 1/sqrt(p))
-  - Each element sigma is initialised to a constant sigma/sqrt(p)
-
-  Note:
-  - Uniform_(LOWER, UPPER) changes tensor values between uniform distribution
-  - fill_(SET_VALUE) fills tensor with set value
-  '''
+  
+  def forward(self, x):
+    if self.training: 
+      weight = self.weight_mu + self.weight_sigma.mul(Variable(self.weight_epsilon))
+      bias   = self.bias_mu   + self.bias_sigma.mul(Variable(self.bias_epsilon))
+    else:
+      weight = self.weight_mu
+      bias   = self.bias_mu
+    
+    return F.linear(x, weight, bias)
+  
   def reset_parameters(self):
-    mu_range = 1.0 / math.sqrt(self.feat_in)
-    self.weights_mu.data.uniform_(-mu_range, mu_range)
+    mu_range = 1 / math.sqrt(self.weight_mu.size(1))
+    
+    self.weight_mu.data.uniform_(-mu_range, mu_range)
+    self.weight_sigma.data.fill_(self.std_init / math.sqrt(self.weight_sigma.size(1)))
+    
     self.bias_mu.data.uniform_(-mu_range, mu_range)
-
-    sigma_value = self.std_init / math.sqrt(self.feat_in)
-    self.weights_sigma.data.fill_(sigma_value)
-    self.bias_sigma.data.fill_(sigma_value)
-
-  '''
-  3 NoisyNets for RL - section b
-  - eps is created with f(x) = sgn(x) * sqrt(|x|)
-  '''
-  def _epsilon_noise(self, size):
+    self.bias_sigma.data.fill_(self.std_init / math.sqrt(self.bias_sigma.size(0)))
+  
+  def sample_noise(self):
+    epsilon_in  = self._scale_noise(self.in_features)
+    epsilon_out = self._scale_noise(self.out_features)
+    
+    self.weight_epsilon.copy_(epsilon_out.ger(epsilon_in))
+    self.bias_epsilon.copy_(self._scale_noise(self.out_features))
+  
+  def _scale_noise(self, size):
     x = torch.randn(size)
-    x = x.sign() * x.abs().sqrt()
+    x = x.sign().mul(x.abs().sqrt())
     return x
 
-  def sample_noise(self):
-    epsilon_in = self._epsilon_noise(self.feat_in)
-    epsilon_out = self._epsilon_noise(self.feat_out)
+
+# class NoisyLinear(nn.Module):
+#   def __init__(self, feat_in, feat_out, std_init=0.4):
+#     super(NoisyLinear, self).__init__()
+
+#     self.std_init = std_init
+#     self.feat_in = feat_in
+#     self.feat_out = feat_out
+
+#     # The weights and biases (mu)
+#     self.weights_mu = nn.Parameter(torch.empty(feat_out, feat_in))
+#     self.bias_mu = nn.Parameter(torch.empty(feat_out))
+
+#     # The weights for noise to scale (sigma)
+#     self.weights_sigma = nn.Parameter(torch.empty(feat_out, feat_in))
+#     self.bias_sigma = nn.Parameter(torch.empty(feat_out))
+
+#     # Buffer to hold noise created
+#     self.register_buffer('weights_eps', torch.empty(feat_out, feat_in))
+#     self.register_buffer('bias_eps', torch.empty(feat_out))
+
+#     # Reset Parameters
+#     self.reset_parameters()
+#     self.sample_noise()
+
+#   '''
+#   3.2 Initialisation of Noisy Network - using factorised noisy networks
+#   - Each element mu is initilased from a uniform distribution U(-1/sqrt(p) , 1/sqrt(p))
+#   - Each element sigma is initialised to a constant sigma/sqrt(p)
+
+#   Note:
+#   - Uniform_(LOWER, UPPER) changes tensor values between uniform distribution
+#   - fill_(SET_VALUE) fills tensor with set value
+#   '''
+#   def reset_parameters(self):
+#     mu_range = 1.0 / math.sqrt(self.feat_in)
+#     self.weights_mu.data.uniform_(-mu_range, mu_range)
+#     self.bias_mu.data.uniform_(-mu_range, mu_range)
+
+#     sigma_value = self.std_init / math.sqrt(self.feat_in)
+#     self.weights_sigma.data.fill_(sigma_value)
+#     self.bias_sigma.data.fill_(sigma_value)
+
+#   '''
+#   3 NoisyNets for RL - section b
+#   - eps is created with f(x) = sgn(x) * sqrt(|x|)
+#   '''
+#   def _epsilon_noise(self, size):
+#     x = torch.randn(size)
+#     x = x.sign() * x.abs().sqrt()
+#     return x
+
+#   def sample_noise(self):
+#     epsilon_in = self._epsilon_noise(self.feat_in)
+#     epsilon_out = self._epsilon_noise(self.feat_out)
     
-    # ger does a matrix multiplication with incoming vector
-    self.weights_eps.copy_(epsilon_out.ger(epsilon_in))
-    self.bias_eps.copy_(self._epsilon_noise(self.feat_out))
+#     # ger does a matrix multiplication with incoming vector
+#     self.weights_eps.copy_(epsilon_out.ger(epsilon_in))
+#     self.bias_eps.copy_(self._epsilon_noise(self.feat_out))
 
-  '''
-  3 NoisyNets for RL - Formula 9
-  - y = (μ_w + σ_w (dot) ε_w) * x  + (μ_b + σ_b (dot) ε_b) 
+#   '''
+#   3 NoisyNets for RL - Formula 9
+#   - y = (μ_w + σ_w (dot) ε_w) * x  + (μ_b + σ_b (dot) ε_b) 
 
-  Note:
-  - We're using F.linear as we're evaluating the result not creating another linear module
-  '''
-  def forward(self, inp):
+#   Note:
+#   - We're using F.linear as we're evaluating the result not creating another linear module
+#   '''
+#   def forward(self, inp):
 
-    # if self.training:
-    #   return F.linear(inp, self.weights_mu + self.weights_sigma * self.weights_eps, self.bias_mu + self.bias_sigma * self.bias_eps)
-    # else:
-    #   return F.linear(inp, self.weights_mu, self.bias_mu)
-    return F.linear(inp, self.weights_mu + self.weights_sigma * self.weights_eps, self.bias_mu + self.bias_sigma * self.bias_eps)
+#     # if self.training:
+#     #   return F.linear(inp, self.weights_mu + self.weights_sigma * self.weights_eps, self.bias_mu + self.bias_sigma * self.bias_eps)
+#     # else:
+#     #   return F.linear(inp, self.weights_mu, self.bias_mu)
+#     return F.linear(inp, self.weights_mu + self.weights_sigma * self.weights_eps, self.bias_mu + self.bias_sigma * self.bias_eps)
 
 class QNetwork(nn.Module):
   def __init__(self, state_size, action_size, seed, fc1_units=64, fc2_units=64):

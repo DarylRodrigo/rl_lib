@@ -121,7 +121,7 @@ class Agent():
       gamma (float): discount factor
     """
     states, actions, rewards, next_states, dones, is_weights, idxs = experiences
-
+    
     # Get expected Q values from local model
     if "sample_noise" in dir(self.qnetwork_local):
       self.qnetwork_local.sample_noise()
@@ -144,6 +144,8 @@ class Agent():
     if PrioritiesedReplayBuffer is self.config.memory:
       errors = Q_expected - Q_targets 
       self.memory.update_priorities(idxs, errors.detach().numpy())
+    
+    # pdb.set_trace()
 
     # Compute loss
     # - Computing loss of what the we expected the Q to be... (aka qnetwork_local(states))
