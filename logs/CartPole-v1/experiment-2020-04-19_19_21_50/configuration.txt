@@ -1,0 +1,24 @@
+env: EnvSpec(CartPole-v1)
+win condition: 195.0
+state space(4,)
+action space2
+device: cpu
+seed: 123456789
+n_episodes: 2000
+max_t: 1000
+eps_start: 1.0
+eps_end: 0.01
+eps_decay: 0.995
+eps_greedy: True
+noisy: False
+tau: 0.001
+gamma: 0.99
+lr: 0.0005
+memory: <class 'src.components.memory.PrioritiesedReplayBuffer'>
+batch_size: 64
+buffer_size: 100000
+lr_annealing: False
+learn_every: 4
+double_dqn: False
+model: <class 'src.networks.models.DualingQNetwork'>
+save_loc: None
