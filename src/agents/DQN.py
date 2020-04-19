@@ -29,8 +29,8 @@ class Agent():
     self.seed = random.seed(self.config.seed)
 
     # Q-Network
-    self.qnetwork_local = self.config.model(state_size, action_size, self.seed, 64, 64).to(self.config.device)
-    self.qnetwork_target = self.config.model(state_size, action_size, self.seed, 64, 64).to(self.config.device)
+    self.qnetwork_local = self.config.model(state_size, action_size, self.seed, 128, 128).to(self.config.device)
+    self.qnetwork_target = self.config.model(state_size, action_size, self.seed, 128, 128).to(self.config.device)
     self.optimizer = optim.Adam(self.qnetwork_local.parameters(), lr=self.config.lr)
 
     # LR scheduler - https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
@@ -90,7 +90,6 @@ class Agent():
     
     # Noisy Agent
     if "sample_noise" in dir(self.qnetwork_local):
-      print(np.argmax(action_values.cpu().data.numpy()))
       return np.argmax(action_values.cpu().data.numpy())
     # Epsilon-greedy action selections
     elif self.config.eps_greedy:

@@ -13,6 +13,7 @@ class Logger:
 
     self.score = []
     self.loss = []
+    self.average_score = []
 
     print("Logging at: {}".format(self.log_file_path))
   
@@ -23,6 +24,8 @@ class Logger:
       self.score.append(value)
     if (name == "loss"):
       self.loss.append(value)
+    if (name == "average_score"):
+      self.average_score.append(value)
 
   def setup_logging_folder(self):
     # Get env name

@@ -13,6 +13,7 @@ from src.agents.DQN import Agent
 def train(config, logger):
   experiment_start = time.time()
   env = config.env
+  frame = 0
 
   agent = Agent(state_size=env.observation_space.shape[0], action_size=env.action_space.n, config=config)
 
@@ -41,6 +42,7 @@ def train(config, logger):
       states = next_states
       scores += rewards
       number_of_time_steps = t
+      frame += 1
       
       if np.any(dones):
         break 
@@ -58,14 +60,15 @@ def train(config, logger):
     total_average_score = np.mean(total_scores_deque)
 
     logger.log_scalar("score", mean_score, i_episode)
+    logger.log_scalar("average_score", total_average_score, i_episode)
     
     duration = time.time() - start_time
 
     # print('\rEpisode {}\tTotal Average Score (in 100 window): {:.4f}\tMean: {:.4f}\tMin: {:.4f}\tMax: {:.4f}\tDuration: {:.4f}\t#TimeSteps: {:.4f}'.format(i_episode, total_average_score, mean_score, min_score, max_score, duration, number_of_time_steps), end="")
-    print('\rEpi: {}\tAverage Score: {:.4f}\tMean: {:.4f}\tDuration: {:.4f}\t#t_s: {:.4f}'.format(i_episode, total_average_score, mean_score, duration, number_of_time_steps), end="")
+    print('\rEpi: {}\t Frame: {} \tAverage: {:.4f}\tMean: {:.4f}\tDuration: {:.2f}\t#t_s: {:.1f}'.format(i_episode, frame, total_average_score, mean_score, duration, number_of_time_steps), end="")
 
     if i_episode % 100 == 0:
-      print('\rEpi: {}\tAverage Score: {:.4f}\tMean: {:.4f}\tDuration: {:.4f}\t#t_s: {:.4f}'.format(i_episode, total_average_score, mean_score, duration, number_of_time_steps))
+      print('\rEpi: {}\t Frame: {}\tAverage Score: {:.4f}\tMean: {:.4f}\tDuration: {:.2f}\t#t_s: {:.1f}'.format(i_episode, frame, total_average_score, mean_score, duration, number_of_time_steps))
       torch.save(agent.qnetwork_local.state_dict(), "{}/checkpoint.pth".format(logger.log_file_path, date=datetime.datetime.now()))
     if config.win_condition is not None and total_average_score > config.win_condition: 
       print("\nEnvironment Solved in {:.4f} seconds !".format(time.time() - experiment_start))
