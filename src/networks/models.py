@@ -227,4 +227,3 @@ class NoisyDualingQNetwork(nn.Module):
     x = value + advantage - advantage.mean()
 
     return x
-

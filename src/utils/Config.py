@@ -33,12 +33,12 @@ class Config:
     self.save_loc = None
   
   def print_config(self):
+    print("Agent Configuration:")
     print("env: \t\t{}".format(self.env.spec))
+    # print("state space\t{}".format(self.env.observation_space.shape))
+    # print("action space\t{}".format(self.env.action_space.n))
+
     print("win condition: \t{}".format(self.win_condition))
-    print("state space\t{}".format(self.env.observation_space.shape))
-    print("action space\t{}".format(self.env.action_space.n))
-
-
     print("device: \t{}".format(self.device))
     print("seed: \t\t{}".format(self.seed))
 

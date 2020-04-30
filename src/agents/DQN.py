@@ -210,12 +210,6 @@ class Agent():
     next_states = torch.from_numpy(np.vstack([n for n in np.array([next_states])])).float().to(self.config.device)
     dones = torch.from_numpy(np.vstack([d for d in np.array([dones])]).astype(np.uint8)).float().to(self.config.device)
 
-    # states = torch.from_numpy(np.vstack([s for s in states])).float().to(self.config.device)
-    # actions = torch.from_numpy(np.vstack([a for a in actions])).long().to(self.config.device)
-    # rewards = torch.from_numpy(np.vstack([r for r in rewards])).float().to(self.config.device)
-    # next_states = torch.from_numpy(np.vstack([n for n in next_states])).float().to(self.config.device)
-    # dones = torch.from_numpy(np.vstack([d for d in dones]).astype(np.uint8)).float().to(self.config.device)
-
     # Get error for samples
     if "sample_noise" in dir(self.qnetwork_local):
       self.qnetwork_local.sample_noise()

@@ -30,6 +30,7 @@ class Logger:
   def setup_logging_folder(self):
     # Get env name
     result = re.search('EnvSpec((.*))', str(self.config.env.spec))
+    print(result)
     env_name = result.group(1)[1:-1]
 
     if self.config.save_loc:
@@ -45,8 +46,8 @@ class Logger:
  
     file.write("env: {}\n".format(self.config.env.spec))
     file.write("win condition: {}\n".format(self.config.win_condition))
-    file.write("state space{}\n".format(self.config.env.observation_space.shape))
-    file.write("action space{}\n".format(self.config.env.action_space.n))
+    # file.write("state space{}\n".format(self.config.env.observation_space.shape))
+    # file.write("action space{}\n".format(self.config.env.action_space.n))
 
 
     file.write("device: {}\n".format(self.config.device))
