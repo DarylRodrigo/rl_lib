@@ -9,7 +9,7 @@ import pdb
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class PPO:
-  def __init__(self, state_space, action_space, hidden_size=64, epsilon=0.2, entropy_beta=0.01, gamma=0.99):
+  def __init__(self, state_space, action_space, hidden_size=64, epsilon=0.2, entropy_beta=0.01, gamma=0.99, lr=0.002):
     self.mem = Memory()
 
     self.gamma = gamma
@@ -21,7 +21,7 @@ class PPO:
 
     self.model_old.load_state_dict(self.model.state_dict())
 
-    self.optimiser = optim.Adam(self.model.parameters(), lr=1e-3)
+    self.optimiser = optim.Adam(self.model.parameters(), lr=lr)
   
   def act(self, x):
     return self.model_old.act(x)
@@ -62,8 +62,6 @@ class PPO:
       surrogate_1 = ratio * advantage
       surrogate_2 = torch.clamp(advantage, 1-self.epsilon, 1+self.epsilon)
       loss = -torch.min(surrogate_1, surrogate_2) + F.mse_loss(values, discounted_returns) - self.entropy_beta*entropy
-      
-      # pdb.set_trace()
 
       loss = loss.mean()
 

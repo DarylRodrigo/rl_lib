@@ -15,6 +15,7 @@ action_size =env.action_space.n
 # PPO Settings
 update_every = 2000
 num_learn = 4
+win_condition = 230
 
 def train(n_episodes=2000, max_t=700):
   steps = 0
@@ -43,7 +44,7 @@ def train(n_episodes=2000, max_t=700):
       scores_deque.append(score)
       scores.append(score)
 
-      if steps > update_every:
+      if steps >= update_every:
         agent.learn(num_learn)
         agent.mem.clear()
         steps = 0
@@ -55,18 +56,12 @@ def train(n_episodes=2000, max_t=700):
       print("\rEpisode {}	Average Score: {:.2f}	Score: {:.2f}".format(i_episode, np.mean(scores_deque), score), end="")
     if i_episode % 100 == 0:
       print("\rEpisode {}	Average Score: {:.2f}".format(i_episode, np.mean(scores_deque)))   
+    
+    if np.mean(scores_deque) > win_condition:
+      print("\rEnvironment Solved!")
+      break
+
 
   return scores
 
 scores = train()
-
-# agent = PPO(state_size, action_size)
-# s = torch.rand(4)
-# a, l = agent.act(s)
-# a = torch.FloatTensor(a)
-# print(l)
-# print(agent.model.evaluate(s, a))
-# print(agent.model_old.evaluate(s, a))
-
-# actions, log_probs, values, entropy = self.model.evaluate(prev_states, prev_actions)
-# print(log_probs)
