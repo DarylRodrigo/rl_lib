@@ -2,9 +2,9 @@
 
 > What I cannot create, I do not understand” - Richard Feynman
 
-Motivation: I have always thought that the only way to truely test if you understand a concept is to see if you can build it. As such all these these algorithms are implemented studying the relevant papers and coded to test my understanding.
+***Motivation: I have always thought that the only way to truely test if you understand a concept is to see if you can build it. As such all these these algorithms are implemented studying the relevant papers and coded to test my understanding.***
 
-## Algorithms
+## Algorithms
 
 ### DQN
 - **Vanilla DQN**
@@ -37,7 +37,7 @@ These were mainly referenced from a really good lecture series by Colin Skow on 
 - Dynamic Programming
 - Q learning
 
-## Results
+## Results
 
 ## Credits
 
