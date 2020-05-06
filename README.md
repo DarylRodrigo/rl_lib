@@ -19,13 +19,13 @@ Motivation: I have always thought that the only way to truely test if you unders
   - Paper: [Rainbow: Combining Improvements in Deep Reinforcement Learning](https://arxiv.org/pdf/1710.02298.pdf)
 
 ## Policy Gradient
-- **A2C (single environment)**
+- **Advantage Actor Critic (A2C) - single environment**
   - Paper: [Asynchronous Methods for Deep Reinforcement Learning](https://arxiv.org/pdf/1602.01783.pdf)
-- **A2C (multiple environments)**
+- **Advantage Actor Critic (A2C) - multi environment**
   - Paper: [Asynchronous Methods for Deep Reinforcement Learning](https://arxiv.org/pdf/1602.01783.pdf)
-- **DDPG**
+- **Deep Deterministic Policy Gradients**
   - Paper: [Continuous Control with Deep Reinforcement Learning](https://arxiv.org/pdf/1509.02971.pdf)
-- **PPO (discrete and continuous)**
+- **Proximal Policy Optimisation (discrete and continuous)**
   - Paper: [Proximal Policy Optimization Algorithms](https://arxiv.org/pdf/1707.06347.pdf)
 
 ## Tabular Solutions
