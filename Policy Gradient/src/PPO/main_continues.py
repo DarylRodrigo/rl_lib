@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 from PPO import PPO, PPOContinuous
 import pdb
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 env = gym.make("Pendulum-v0")
 # env = gym.make("MountainCarContinuous-v0")
 
@@ -49,7 +51,7 @@ def train(n_episodes=4000, max_t=1500):
     for t in range(max_t):
       steps += 1
 
-      actions_tensor, log_prob = agent.act(torch.FloatTensor(state))
+      actions_tensor, log_prob = agent.act(torch.FloatTensor(state).to(device))
       actions = actions_tensor.cpu().data.numpy().flatten()
       next_state, reward, done, _ = env.step(actions_tensor)
 
