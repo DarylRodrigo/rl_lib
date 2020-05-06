@@ -40,7 +40,7 @@ class PPO:
       discounted_returns.insert(0,running_reward)
 
     # normalise rewards
-    discounted_returns = torch.FloatTensor(discounted_returns)
+    discounted_returns = torch.FloatTensor(discounted_returns).to(device)
     discounted_returns = (discounted_returns - discounted_returns.mean()) / (discounted_returns.std() + 1e-5)
 
     prev_states = torch.stack(self.mem.states).to(device).detach()
@@ -53,11 +53,8 @@ class PPO:
       actions, log_probs, values, entropy = self.model.evaluate(prev_states, prev_actions)
       ratio = torch.exp(log_probs - prev_log_probs.detach())
 
-      actions, log_probs, values, entropy = self.model.evaluate(prev_states, prev_actions)
-      actions, log_probs, values, entropy = self.model_old.evaluate(prev_states, prev_actions)
-
       # calculate advantage
-      advantage = discounted_returns - values.detach()
+      advantage = discounted_returns - values.cpu().detach()
 
       # calculate surrogates
       surrogate_1 = ratio * advantage
@@ -104,7 +101,7 @@ class PPOContinuous(PPO):
       discounted_returns.insert(0,running_reward)
 
     # normalise rewards
-    discounted_returns = torch.FloatTensor(discounted_returns)
+    discounted_returns = torch.FloatTensor(discounted_returns).to(device)
     discounted_returns = (discounted_returns - discounted_returns.mean()) / (discounted_returns.std() + 1e-5)
 
     
@@ -118,10 +115,7 @@ class PPOContinuous(PPO):
       # find ratios
       actions, log_probs, values, entropy = self.model.evaluate(prev_states, prev_actions)
       ratio = torch.exp(log_probs - prev_log_probs.detach())
-
-      actions, log_probs, values, entropy = self.model.evaluate(prev_states, prev_actions)
-      actions, log_probs, values, entropy = self.model_old.evaluate(prev_states, prev_actions)
-
+    
       # calculate advantage
       advantage = discounted_returns - values.detach()
 

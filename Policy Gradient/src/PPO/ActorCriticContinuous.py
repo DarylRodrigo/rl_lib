@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 
 import pdb
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 class ActorCriticContinuous(nn.Module):
   """Some Information about ActorCritic"""
   def __init__(self, state_space, action_space, hidden_size):
@@ -63,7 +65,7 @@ class ActorCriticContinuous(nn.Module):
     x = state
 
     action_mean, value = self.forward(x)
-    cov_mat = torch.diag(torch.ones(self.action_space) * 0.5**0.5)
+    cov_mat = torch.diag(torch.ones(self.action_space).to(device) * 0.5**0.5)
     
     dist = MultivariateNormal(action_mean, cov_mat)
     action = dist.sample()
@@ -72,21 +74,8 @@ class ActorCriticContinuous(nn.Module):
   
   def evaluate(self, state, action):
     action_mean, value = self.forward(state)
-    cov_mat = torch.diag(torch.ones(self.action_space) * 0.5**0.5)
+    cov_mat = torch.diag(torch.ones(self.action_space).to(device) * 0.5**0.5)
 
     dist = MultivariateNormal(action_mean, cov_mat)
     
     return action, dist.log_prob(action), value, dist.entropy()
-  
-# network = ActorCriticContinuous(3, 2, 64)
-# state = torch.randn(2, 3)
-
-
-# action, log_prob = network.act(state)
-# print("action: {}".format(action))
-# print("log_prob: {}".format(log_prob))
-
-
-# action, log_prob, value, entropy = network.evaluate(state, action)
-# print("action: {}".format(action))
-# print("log_prob: {}".format(log_prob))
