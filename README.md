@@ -10,7 +10,7 @@
 - **Vanilla DQN**
   - Paper: [Human-level control through deep reinforcement learning](https://storage.googleapis.com/deepmind-data/assets/papers/DeepMindNature14236Paper.pdf)
 - **Noisy DQN**
-  - Paper: [NOISY NETWORKS FOR EXPLORATION](https://arxiv.org/pdf/1706.10295.pdf)
+  - Paper: [Noisy Networks for Exploration](https://arxiv.org/pdf/1706.10295.pdf)
 - **Dualing DQN**
   - Paper: [Dueling Network Architectures for Deep Reinforcement Learning](https://arxiv.org/pdf/1511.06581.pdf)
 - **Double DQN**
