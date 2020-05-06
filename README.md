@@ -1,6 +1,6 @@
-# rl_lib
+# rl_lib
 
-## DQN
+## DQN
 - Vanilla DQN
 - Noisy DQN
 - Dualing DQN
@@ -14,7 +14,7 @@
 - DDPG
 - PPP (discrete and continuous)
 
-## Tabular Solutions
+## Tabular Solutions
 
 - Bellman Equation
 - Dynamic Programming
