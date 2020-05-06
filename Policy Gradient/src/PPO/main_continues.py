@@ -53,7 +53,7 @@ def train(n_episodes=4000, max_t=1500):
 
       actions_tensor, log_prob = agent.act(torch.FloatTensor(state).to(device))
       actions = actions_tensor.cpu().data.numpy().flatten()
-      next_state, reward, done, _ = env.step(actions_tensor)
+      next_state, reward, done, _ = env.step(actions_tensor.cpu().numpy())
 
       agent.mem.add(torch.FloatTensor(state), actions, reward, log_prob, done)
 
