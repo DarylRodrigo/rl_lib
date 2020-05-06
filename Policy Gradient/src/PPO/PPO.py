@@ -107,9 +107,11 @@ class PPOContinuous(PPO):
     discounted_returns = torch.FloatTensor(discounted_returns)
     discounted_returns = (discounted_returns - discounted_returns.mean()) / (discounted_returns.std() + 1e-5)
 
+    
+
     prev_states = torch.stack(self.mem.states).to(device).detach()
-    prev_actions = torch.squeeze(torch.stack(self.mem.actions).to(device),1 ).detach()
-    prev_log_probs = torch.squeeze(torch.stack(self.mem.log_probs).to(device), 1).detach()
+    prev_actions = torch.FloatTensor(self.mem.actions).to(device).detach()
+    prev_log_probs = torch.FloatTensor(self.mem.log_probs).to(device).detach()
 
     for i in range(num_learn):
 
@@ -126,7 +128,7 @@ class PPOContinuous(PPO):
       # calculate surrogates
       surrogate_1 = ratio * advantage
       surrogate_2 = torch.clamp(advantage, 1-self.epsilon, 1+self.epsilon)
-      loss = -torch.min(surrogate_1, surrogate_2) + F.mse_loss(values, discounted_returns) - self.entropy_beta*entropy
+      loss = -torch.min(surrogate_1, surrogate_2) + 0.5*F.mse_loss(values, discounted_returns) - self.entropy_beta*entropy
 
       loss = loss.mean()
 

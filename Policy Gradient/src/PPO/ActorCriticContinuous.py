@@ -58,7 +58,9 @@ class ActorCriticContinuous(nn.Module):
     return actions, value
   
   def act(self, state):
-    x = torch.FloatTensor(state.reshape(1, -1))
+    # x = torch.FloatTensor(state.reshape(1, -1))
+
+    x = state
 
     action_mean, value = self.forward(x)
     cov_mat = torch.diag(torch.ones(self.action_space) * 0.5**0.5)
@@ -73,6 +75,18 @@ class ActorCriticContinuous(nn.Module):
     cov_mat = torch.diag(torch.ones(self.action_space) * 0.5**0.5)
 
     dist = MultivariateNormal(action_mean, cov_mat)
-    action = dist.sample()
     
     return action, dist.log_prob(action), value, dist.entropy()
+  
+# network = ActorCriticContinuous(3, 2, 64)
+# state = torch.randn(2, 3)
+
+
+# action, log_prob = network.act(state)
+# print("action: {}".format(action))
+# print("log_prob: {}".format(log_prob))
+
+
+# action, log_prob, value, entropy = network.evaluate(state, action)
+# print("action: {}".format(action))
+# print("log_prob: {}".format(log_prob))

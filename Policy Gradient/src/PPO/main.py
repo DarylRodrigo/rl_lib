@@ -17,7 +17,7 @@ update_every = 2000
 num_learn = 4
 win_condition = 230
 
-def train(n_episodes=2000, max_t=700):
+def train(n_episodes=4000, max_t=700):
   steps = 0
   scores_deque = deque(maxlen=100)
   scores = []

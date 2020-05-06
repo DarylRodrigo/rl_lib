@@ -9,6 +9,7 @@ from PPO import PPO, PPOContinuous
 import pdb
 
 env = gym.make("Pendulum-v0")
+# env = gym.make("MountainCarContinuous-v0")
 
 env.seed(10)
 
@@ -19,8 +20,8 @@ print(state_size)
 print(action_size)
 
 # PPO Settings
-update_every = 4000
-num_learn = 80
+update_every = 2000
+num_learn = 40
 win_condition = 0
 
 # Agent settings
@@ -32,7 +33,7 @@ lr=0.0003
 
 agent = PPOContinuous(state_size, action_size, hidden_size=hidden_size, epsilon=epsilon, entropy_beta=entropy_beta, gamma=gamma, lr=lr)
 
-def train(n_episodes=2000, max_t=1500):
+def train(n_episodes=4000, max_t=1500):
   steps = 0
   scores_deque = deque(maxlen=100)
   scores = []
