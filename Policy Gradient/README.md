@@ -17,7 +17,11 @@ Actor critic is a method where there are two neural networks within the agent:
 
 To illustrate this, consider the following example:
 
-<img src="./img/intro/11s.png" alt="Drawing" style="height: 50px;"/>
+
+<p align="center">
+  <img src="./img/intro/11s.png" alt="Drawing" height="300"/>
+</p>
+
 
 If you have an agent which is learning to run as fast as possible and ends up with a score of 11 (seconds to run to the finish line). Then how good is this? Is it the fastest every run because the distance was 1km or is it terrible because it only had to run 10m. This is the job of the critic to decipher, by looking at the past experiences it works out on average how good or bad an action is.
 
