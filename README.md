@@ -1,9 +1,9 @@
 [🛠WORK IN PROGRESS 🛠]
 # rl_lib 
 
-> What I cannot create, I do not understand” - Richard Feynman
-
 **Motivation:** I have always thought that the only way to truely test if you understand a concept is to see if you can build it. As such all these these algorithms are implemented studying the relevant papers and coded to test my understanding.
+
+> What I cannot create, I do not understand” - Richard Feynman
 
 ## Algorithms
 
