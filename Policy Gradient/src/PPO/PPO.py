@@ -1,6 +1,6 @@
-from ActorCritic import ActorCritic
-from ActorCriticContinuous import ActorCriticContinuous
-from Memory import Memory
+from .ActorCritic import ActorCritic
+from .ActorCriticContinuous import ActorCriticContinuous
+from .Memory import Memory
 import torch
 import torch.optim as optim
 import torch.nn.functional as F

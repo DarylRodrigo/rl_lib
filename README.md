@@ -31,11 +31,11 @@
   - Paper: [Proximal Policy Optimization Algorithms](https://arxiv.org/pdf/1707.06347.pdf)
 
 ### Tabular Solutions
-These were mainly referenced from a really good lecture series by Colin Skow on youtube [link](https://www.youtube.com/watch?v=14BfO5lMiuk&list=PLWzQK00nc192L7UMJyTmLXaHa3KcO0wBT). A large part was also found in the Deep Reinforcement Learning Udacity course.
+These were mainly referenced from a really good lecture series by Colin Skow on youtube [[link]](https://www.youtube.com/watch?v=14BfO5lMiuk&list=PLWzQK00nc192L7UMJyTmLXaHa3KcO0wBT). A large part was also found in the Deep Reinforcement Learning Udacity course.
 
-- Bellman Equation
-- Dynamic Programming
-- Q learning
+- **Bellman Equation**
+- **Dynamic Programming**
+- **Q learning**
 
 ## Results
 
