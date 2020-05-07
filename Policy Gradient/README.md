@@ -34,7 +34,11 @@ Over time the we’ll learn what a good value state is. This is what the actor c
 
 ## N-step Bootstrapping
 
-There are many different ways on how to estimate what the future reward from a given state is going to look like. Below are three main categories in which they can fall.
+In order to compute how well a policy has done, we need to know what the reward for said policy in a given state with a given action. As we'll see there are various methods of doing this, however its worth knowing what the value function is before diving in.
+
+> The value function estimates what the expected return is in a given state when following a particular policy.
+
+Below are three main methods on estimating the expected return of a policy:
 
 <p align="center">
   <img src="./img/intro/bootstrapping.jpeg" alt="Drawing" height="300"/>
