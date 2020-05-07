@@ -1,6 +1,6 @@
 # Policy Gradients
 
-#### What is a Policy?
+#### What is a Policy?
 A policy is a set of probabilities distributions to what action to take in a given state. 
 
 #### What is the Objective of a Policy Gradient?
@@ -32,7 +32,7 @@ If you have an agent which is learning to run as fast as possible and ends up wi
 
 Over time the we’ll learn what a good value state is. This is what the actor citric method is. The actor makes the decisions and the critic tells us how good or bad those actions will be in the future.
 
-## N-step Bootstrapping
+## N-step Bootstrapping
 
 There are many different ways on how to estimate what the future reward from a given state is going to look like. Below are three main categories in which they can fall.
 
@@ -40,8 +40,8 @@ There are many different ways on how to estimate what the future reward from a g
   <img src="./img/intro/bootstrapping.jpeg" alt="Drawing" height="300"/>
 </p>
 
-1. The first method is a infinite-bootstrap, essentially Monte Carlo. The algorithm plays out the entire episode and looks at what the reward is. This means that estimate of the reward isn't really an estimate but the exact answer. The problem with this method is that it takes long to compute and has a very high varience. That is to say, if the algorithm were to play the scene out again, there is a large change that the new reward would be different. This can be combated by playing many episode with the same policy, and averaging the reward (as is done with the REINFORCE algorithm), however this is computationly very expensive, especially if it's a large game. Moreover, as number of states the agent can enter increase the agent is likely to enter states it hasn't seen before and will not know what to do.
+1. ***Monte Carlo*** The first method is a infinite-bootstrap, essentially Monte Carlo. The algorithm plays out the entire episode and looks at what the reward is. This means that estimate of the reward isn't really an estimate but the exact answer. The problem with this method is that it takes long to compute and has a very high varience. That is to say, if the algorithm were to play the scene out again, there is a large change that the new reward would be different. This can be combated by playing many episode with the same policy, and averaging the reward (as is done with the REINFORCE algorithm), however this is computationly very expensive, especially if it's a large game. Moreover, as number of states the agent can enter increase the agent is likely to enter states it hasn't seen before and will not know what to do.
 
-2. The second method uses a ***value function*** to estimate the value of a given state. Instead of computing the entire episode to be able to train, the agent can now use the value function as a substitute. The problem here of course is that the value function needs to be honed over time. This method will have a low variance, as when an agent enters a similar or same state, it will likely view it as having the same value as before. On the flip side it will also have a high bias, as the value function will not be entirely correct of predicting what the final reward will be.
+2. ***Temperal Difference (TD) *** The second method uses a ***value function*** to estimate the value of a given state. Instead of computing the entire episode to be able to train, the agent can now use the value function as a substitute. The problem here of course is that the value function needs to be honed over time. This method will have a low variance, as when an agent enters a similar or same state, it will likely view it as having the same value as before. On the flip side it will also have a high bias, as the value function will not be entirely correct of predicting what the final reward will be.
 
-3. Lastly we have a happy middle ground, taking a few steps means that the variance should stay low, as these are actions we're taking in the real world. However after 'n' steps, we use the value function to finish of the estimate of what the final reward will be.
+3. ***N-step Bootstrapping**** Lastly we have a happy middle ground, taking a few steps means that the variance should stay low, as these are actions we're taking in the real world. However after 'n' steps, we use the value function to finish of the estimate of what the final reward will be.
