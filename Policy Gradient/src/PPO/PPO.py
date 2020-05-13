@@ -1,5 +1,5 @@
 from .ActorCritic import ActorCritic
-from .ActorCriticContinuous import ActorCriticContinuous
+from .ActorCriticContinuous import ActorCriticLSTMContinuous
 from .Memory import Memory
 import torch
 import torch.optim as optim
@@ -17,8 +17,8 @@ class PPO:
     self.epsilon = epsilon
     self.entropy_beta = entropy_beta
 
-    self.model = ActorCritic(state_space, action_space, hidden_size).to(device)
-    self.model_old = ActorCritic(state_space, action_space, hidden_size).to(device)
+    self.model = ActorCriticLSTMContinuous(state_space, action_space, hidden_size).to(device)
+    self.model_old = ActorCriticLSTMContinuous(state_space, action_space, hidden_size).to(device)
 
     self.model_old.load_state_dict(self.model.state_dict())
 
