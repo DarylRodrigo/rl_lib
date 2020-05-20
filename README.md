@@ -40,6 +40,18 @@ These were mainly referenced from a really good lecture series by Colin Skow on 
 
 ## Results
 
+### PPO discrete
+Solved in 409 episodes
+<p align="center">
+  <img src="./Policy Gradient/img/ppo/pendulum-continuous-ppo.gif" alt="Drawing" height="200"/>
+</p>
+
+### PPO Continuous
+Solved in 1498 episodes
+<p align="center">
+  <img src="./Policy Gradient/img/ppo/lunar-lander.gif" alt="Drawing" height="200"/>
+</p>
+
 ## Todo
 - General Advantage Estimator
 - Pull Policy Gradient algorithms into seperate files
