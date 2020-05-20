@@ -47,7 +47,7 @@ Solved in 409 episodes
 </p>
 
 ### PPO Continuous
-Solved in 1498 episodes
+Trained for 2000 episodes
 <p>
   <img src="./Policy Gradient/img/ppo/pendulum-continuous-ppo.gif" alt="Drawing" height="200"/>
 </p>
