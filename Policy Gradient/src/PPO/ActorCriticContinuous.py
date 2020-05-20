@@ -19,20 +19,20 @@ class ActorCriticContinuous(nn.Module):
     self.state_space = state_space
     
     self.actor = nn.Sequential(
-      nn.Linear(state_space, hidden_size),
+      nn.Linear(state_space, 64),
       nn.Tanh(),
-      nn.Linear(hidden_size, hidden_size),
+      nn.Linear(64, 32),
       nn.Tanh(),
-      nn.Linear(hidden_size, action_space),
+      nn.Linear(32, action_space),
       nn.Tanh(),
     )
 
     self.critic = nn.Sequential(
-      nn.Linear(state_space, hidden_size),
+      nn.Linear(state_space, 64),
       nn.Tanh(),
-      nn.Linear(hidden_size, hidden_size),
+      nn.Linear(64, 32),
       nn.Tanh(),
-      nn.Linear(hidden_size, 1)
+      nn.Linear(32, 1)
     ) 
 
   def forward(self, x):
