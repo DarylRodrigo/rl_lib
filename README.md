@@ -40,15 +40,15 @@ These were mainly referenced from a really good lecture series by Colin Skow on 
 
 ## Results
 
-### PPO discrete
+### PPO discrete
 Solved in 409 episodes
-<p align="center">
+<p>
   <img src="./Policy Gradient/img/ppo/pendulum-continuous-ppo.gif" alt="Drawing" height="200"/>
 </p>
 
-### PPO Continuous
+### PPO Continuous
 Solved in 1498 episodes
-<p align="center">
+<p>
   <img src="./Policy Gradient/img/ppo/lunar-lander.gif" alt="Drawing" height="200"/>
 </p>
 
