@@ -46,8 +46,8 @@ Solved in 409 episodes
   <img src="./Policy Gradient/img/ppo/lunar-lander.gif" alt="Drawing" height="200"/>
 </p>
 
-### PPO Continuous
-Trained for 2000 episodes
+### DDPG Continuous
+Converged to ~ -270 after a 100 episodes
 <p>
   <img src="./Policy Gradient/img/ppo/pendulum-continuous-ppo.gif" alt="Drawing" height="200"/>
 </p>
