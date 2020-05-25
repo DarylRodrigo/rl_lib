@@ -40,6 +40,12 @@ These were mainly referenced from a really good lecture series by Colin Skow on 
 
 ## Results
 
+### DQN Pong
+Converged to an average of 17.56 after 1300 Episodes.
+<p>
+  <img src="./DQN/img/vanilla_atari_pong/atari_pong_vanilla_dqn.gif" alt="Drawing" height="200"/>
+</p>
+
 ### PPO discrete
 Solved in 409 episodes
 <p>
