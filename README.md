@@ -1,4 +1,3 @@
-[🛠WORK IN PROGRESS 🛠]
 # rl_lib 
 
 **Motivation:** I have always thought that the only way to truely test if you understand a concept is to see if you can build it. As such all these these algorithms are implemented studying the relevant papers and coded to test my understanding.
@@ -40,14 +39,23 @@ These were mainly referenced from a really good lecture series by Colin Skow on 
 
 ## Results
 
+### DQN Pong
+- Converged to an average of 17.56 after 1300 Episodes.
+- Code and results can be found under `DQN/7. Vanilla DQN Atari.ipynb`
+<p>
+  <img src="./DQN/img/vanilla_atari_pong/atari_pong_vanilla_dqn.gif" alt="Drawing" height="200"/>
+</p>
+
 ### PPO discrete
-Solved in 409 episodes
+- Solved in 409 episodes
+- Code and results can be found under `Policy Gradient/5. PPO.ipynb`
 <p>
   <img src="./Policy Gradient/img/ppo/lunar-lander.gif" alt="Drawing" height="200"/>
 </p>
 
 ### DDPG Continuous
-Converged to ~ -270 after a 100 episodes
+- Converged to ~ -270 after a 100 episodes
+- Code and results can be found under `Policy Gradient/4. DDPG.ipynb.ipynb`
 <p>
   <img src="./Policy Gradient/img/ppo/pendulum-continuous-ppo.gif" alt="Drawing" height="200"/>
 </p>
@@ -56,7 +64,6 @@ Converged to ~ -270 after a 100 episodes
 - General Advantage Estimator
 - Pull Policy Gradient algorithms into seperate files
 - Curiousity Driven Exploration
-- Atari Games environments solved
 - HER (Hindsight Experience Replay)
 - Recurrent networks in PPO and DDPG
 
