@@ -65,7 +65,6 @@ These were mainly referenced from a really good lecture series by Colin Skow on 
 - General Advantage Estimator
 - Pull Policy Gradient algorithms into seperate files
 - Curiousity Driven Exploration
-- Atari Games environments solved
 - HER (Hindsight Experience Replay)
 - Recurrent networks in PPO and DDPG
 
