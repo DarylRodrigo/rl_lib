@@ -161,58 +161,7 @@ class NoisyAgent():
 
     # ------------------- update target network ------------------- #
     self.soft_update(self.qnetwork_local, self.qnetwork_target, self.TAU)    
-
-  # def learn(self, experiences, gamma):
-  #   """Update value parameters using given batch of experience tuples.
-
-  #   Params
-  #   ======
-  #     experiences (Tuple[torch.Tensor]): tuple of (s, a, r, s', done) tuples 
-  #     gamma (float): discount factor
-  #   """
-  #   states, actions, rewards, next_states, dones = experiences
-
-  #   # Get expected Q values from local model
-  #   self.qnetwork_local.sample_noise()
-  #   Q_expected = self.qnetwork_local(states).gather(1, actions)
-
-  #   # Get max predicted Q values (f) for next statesrom target model
-  #   # - Basically, this means taht for the actions that we chose we don't take the updated Q table every time but instead
-  #   #   from a precomputed on ... we'll update it every ONCE in a While
-
-  #   # Passforward with Next_state in qnetworkTarget
-    
-  #   self.qnetwork_target.sample_noise()
-  #   # ORIGINAL -> Q_targets_next = self.qnetwork_target(next_states).detach().max(1)[0].unsqueeze(1)
-  #   Q_targets_next = self.max_next_action(next_states)
-
-  #   # Compute Q targets for current states 
-  #   # D - essentially taking what the target_network outputs, * gamma + the reward
-  #   # Discounted valye for next state.
-  #   # Your expected reward... discounted by gamma + your curent reward.
-  #   Q_targets = rewards + (gamma * Q_targets_next * (1 - dones))
-
-
-
-
-  #   # Compute loss
-  #   # - Computing loss of what the we expected the Q to be... (aka qnetwork_local(states))
-  #   # &
-  #   #   What the target is (reward + what the expected reward of the next action was)
-  #   # EG
-  #   # -> if the action was super awesome and normally did really well, but this time not... it would go down a little.
-  #   loss = F.mse_loss(Q_expected, Q_targets)
-
-  #   self.loss = loss
-
-  #   # Minimize the loss
-  #   # - Optimizer is initilaised with qnetwork_local, so will update that one.
-  #   self.optimizer.zero_grad()
-  #   loss.backward()
-  #   self.optimizer.step()
-
-  #   # ------------------- update target network ------------------- #
-  #   self.soft_update(self.qnetwork_local, self.qnetwork_target, self.TAU)                     
+            
 
   def soft_update(self, local_model, target_model, tau):
     """Soft update model parameters.
