@@ -4,10 +4,11 @@ from .Memory import Memory
 import torch
 import torch.optim as optim
 import torch.nn.functional as F
-import copy
 import pdb
 
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 
 class PPO:
   def __init__(self, state_space, action_space, hidden_size=64, epsilon=0.2, entropy_beta=0.01, gamma=0.99, lr=0.002):
@@ -23,7 +24,7 @@ class PPO:
     self.model_old.load_state_dict(self.model.state_dict())
 
     self.optimiser = optim.Adam(self.model.parameters(), lr=lr)
-  
+
   def act(self, x):
     return self.model_old.act(x)
 
@@ -67,8 +68,9 @@ class PPO:
       self.optimiser.zero_grad()
       loss.backward()
       self.optimiser.step()
-    
+
     self.model_old.load_state_dict(self.model.state_dict())
+
 
 class PPOContinuous(PPO):
   def __init__(self, state_space, action_space, hidden_size=64, epsilon=0.2, entropy_beta=0.01, gamma=0.99, lr=0.002):
@@ -84,7 +86,7 @@ class PPOContinuous(PPO):
     self.model_old.load_state_dict(self.model.state_dict())
 
     self.optimiser = optim.Adam(self.model.parameters(), lr=lr)
-  
+
   def act(self, x):
     return self.model_old.act(x)
 
@@ -104,8 +106,6 @@ class PPOContinuous(PPO):
     discounted_returns = torch.FloatTensor(discounted_returns).to(device)
     discounted_returns = (discounted_returns - discounted_returns.mean()) / (discounted_returns.std() + 1e-5)
 
-    
-
     prev_states = torch.stack(self.mem.states).to(device).detach()
     prev_actions = torch.FloatTensor(self.mem.actions).to(device).detach()
     prev_log_probs = torch.FloatTensor(self.mem.log_probs).to(device).detach()
@@ -115,7 +115,7 @@ class PPOContinuous(PPO):
       # find ratios
       actions, log_probs, values, entropy = self.model.evaluate(prev_states, prev_actions)
       ratio = torch.exp(log_probs - prev_log_probs.detach())
-    
+
       # calculate advantage
       advantage = discounted_returns - values.detach()
 
@@ -130,5 +130,5 @@ class PPOContinuous(PPO):
       self.optimiser.zero_grad()
       loss.backward()
       self.optimiser.step()
-    
+
     self.model_old.load_state_dict(self.model.state_dict())
