@@ -41,7 +41,7 @@ class PPO:
 
     # normalise rewards
     discounted_returns = torch.FloatTensor(discounted_returns).to(device)
-    discounted_returns = (discounted_returns - discounted_returns.mean()) / (discounted_returns.std() + 1e-5)
+    discounted_returns = (discounted_returns - discounted_returns.mean()) / (discounted_returns.std() + 1e-8)
 
     prev_states = torch.stack(self.mem.states).to(device).detach()
     prev_actions = torch.stack(self.mem.actions).to(device).detach()
@@ -102,7 +102,7 @@ class PPOContinuous(PPO):
 
     # normalise rewards
     discounted_returns = torch.FloatTensor(discounted_returns).to(device)
-    discounted_returns = (discounted_returns - discounted_returns.mean()) / (discounted_returns.std() + 1e-5)
+    discounted_returns = (discounted_returns - discounted_returns.mean()) / (discounted_returns.std() + 1e-8)
 
     
 
