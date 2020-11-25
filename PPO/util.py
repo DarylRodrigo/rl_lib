@@ -14,7 +14,7 @@ def train(config):
   scores = []
   max_score = -np.Inf
 
-  agent = PPO(config.state_size, config.action_size)
+  agent = PPO(config)
 
   for i_episode in range(1, config.n_episodes+1):
     state = env.reset()

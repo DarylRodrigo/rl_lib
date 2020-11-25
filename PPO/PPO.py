@@ -1,27 +1,27 @@
-from ActorCritic import ActorCritic
-from Memory import Memory
 import torch
 import torch.optim as optim
 import torch.nn.functional as F
 import copy
 import pdb
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
 class PPO:
-  def __init__(self, state_space, action_space, hidden_size=64, epsilon=0.2, entropy_beta=0.01, gamma=0.99, lr=0.002):
-    self.mem = Memory()
+  # def __init__(self, state_space, action_space, hidden_size=64, epsilon=0.2, entropy_beta=0.01, gamma=0.99, lr=0.002):
+  def __init__(self, config):
+    self.mem = config.Memory()
 
-    self.gamma = gamma
-    self.epsilon = epsilon
-    self.entropy_beta = entropy_beta
+    self.gamma = config.gamma
+    self.epsilon = config.epsilon
+    self.entropy_beta = config.entropy_beta
+    self.device = config.device
 
-    self.model = ActorCritic(state_space, action_space, hidden_size).to(device)
-    self.model_old = ActorCritic(state_space, action_space, hidden_size).to(device)
+    hidden_size = 64
+
+    self.model = config.Model(config.state_space, config.action_space, hidden_size).to(self.device)
+    self.model_old = config.Model(config.state_space, config.action_space, hidden_size).to(self.device)
 
     self.model_old.load_state_dict(self.model.state_dict())
 
-    self.optimiser = optim.Adam(self.model.parameters(), lr=lr)
+    self.optimiser = optim.Adam(self.model.parameters(), lr=config.lr)
   
   def act(self, x):
     return self.model_old.act(x)
@@ -39,12 +39,12 @@ class PPO:
       discounted_returns.insert(0,running_reward)
 
     # normalise rewards
-    discounted_returns = torch.FloatTensor(discounted_returns).to(device)
+    discounted_returns = torch.FloatTensor(discounted_returns).to(self.device)
     discounted_returns = (discounted_returns - discounted_returns.mean()) / (discounted_returns.std() + 1e-5)
 
-    prev_states = torch.stack(self.mem.states).to(device).detach()
-    prev_actions = torch.stack(self.mem.actions).to(device).detach()
-    prev_log_probs = torch.stack(self.mem.log_probs).to(device).detach()
+    prev_states = torch.stack(self.mem.states).to(self.device).detach()
+    prev_actions = torch.stack(self.mem.actions).to(self.device).detach()
+    prev_log_probs = torch.stack(self.mem.log_probs).to(self.device).detach()
 
     for i in range(num_learn):
 

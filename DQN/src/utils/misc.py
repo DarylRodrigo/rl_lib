@@ -39,7 +39,7 @@ def train(config, logger):
 
       
       
-      states = next_statess
+      states = next_states
       scores += rewards
       number_of_time_steps = t
       frame += 1

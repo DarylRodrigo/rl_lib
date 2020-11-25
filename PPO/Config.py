@@ -3,8 +3,8 @@ import torch
 class Config:
   def __init__(self, env):
     self.env = env
-    self.state_size = env.observation_space.shape[0]
-    self.action_size = env.action_space.n
+    self.state_space = env.observation_space.shape[0]
+    self.action_space = env.action_space.n
 
     self.win_condition = None
 
@@ -13,6 +13,8 @@ class Config:
 
     self.n_episodes = 2000
     self.max_t = 1000
+    # TODO set as decaying and pass into learn from PPO
+    self.epsilon = 0.2
     self.eps_start = 1.0
     self.eps_end = 0.01
     self.eps_decay = 0.995
@@ -29,6 +31,7 @@ class Config:
     self.buffer_size = int(1e5)
     self.lr_annealing = False
     self.learn_every = 4
+    self.entropy_beta = 0.01
 
     self.double_dqn = False
     self.model = None
