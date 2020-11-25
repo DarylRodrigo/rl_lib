@@ -1,40 +1,33 @@
-import numpy as np
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
 from torch.distributions import Categorical
 
-import pdb
 
 class ActorCritic(nn.Module):
   """Some Information about ActorCritic"""
-  def __init__(self, state_space, action_space, hidden_size):
+  def __init__(self, config):
     super(ActorCritic, self).__init__()
-    
-    self.head = nn.Sequential(
-      nn.Linear(state_space, hidden_size),
-      nn.ReLU()
+
+    self.head = config.head_model()
+
+    self.actor = config.actor_model()
+    self.actor.add_module(
+      "actor_linear",
+      nn.Linear(config.hidden_size, config.action_space)
     )
 
-    self.actor = nn.Sequential(
-      nn.Linear(hidden_size, hidden_size),
-      nn.ReLU(),
-      nn.Linear(hidden_size, action_space)
+    self.critic = config.critic_model()
+    self.critic.add_module(
+      "critic_linear",
+      nn.Linear(config.hidden_size, 1)
     )
-
-    self.critic = nn.Sequential(
-      nn.Linear(hidden_size, hidden_size),
-      nn.ReLU(),
-      nn.Linear(hidden_size, 1)
-    ) 
 
   def forward(self, x):
     x = self.head(x)
     value = self.critic(x)
     action = self.actor(x)
     return action, value
-  
+
   def act(self, x):
     logits, value = self.forward(x)
 
@@ -42,10 +35,28 @@ class ActorCritic(nn.Module):
     probs = Categorical(logits)
     action = probs.sample()
 
-    return action,probs.log_prob(action)
+    return action, probs.log_prob(action)
   
   def evaluate(self, state, action):
     logits, value = self.forward(state)
     logits = F.softmax(logits, dim=-1) 
     probs = Categorical(logits)
     return action, probs.log_prob(action), value, probs.entropy()
+
+def head_model(config):
+  return nn.Sequential(
+    nn.Linear(config.state_space, config.hidden_size),
+    nn.ReLU()
+  )
+
+def actor_model(config):
+  return nn.Sequential(
+    nn.Linear(config.hidden_size, config.hidden_size),
+    nn.ReLU()
+  )
+
+def critic_model(config):
+  return nn.Sequential(
+    nn.Linear(config.hidden_size, config.hidden_size),
+    nn.ReLU()
+  )

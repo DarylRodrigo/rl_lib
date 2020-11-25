@@ -15,8 +15,8 @@ class PPO:
 
     hidden_size = 64
 
-    self.model = config.Model(config.state_space, config.action_space, hidden_size).to(self.device)
-    self.model_old = config.Model(config.state_space, config.action_space, hidden_size).to(self.device)
+    self.model = config.Model(config).to(self.device)
+    self.model_old = config.Model(config).to(self.device)
 
     self.model_old.load_state_dict(self.model.state_dict())
 
