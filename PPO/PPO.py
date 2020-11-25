@@ -5,7 +5,6 @@ import copy
 import pdb
 
 class PPO:
-  # def __init__(self, state_space, action_space, hidden_size=64, epsilon=0.2, entropy_beta=0.01, gamma=0.99, lr=0.002):
   def __init__(self, config):
     self.mem = config.Memory()
 
