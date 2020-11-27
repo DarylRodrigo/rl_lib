@@ -2,7 +2,8 @@ import functools
 import gym
 from Config import Config
 from util import train
-from Models import ActorCritic, head_model, actor_model, critic_model
+from Models import ActorCritic
+from Networks import head_model, actor_model, critic_model
 from Memory import Memory
 
 
@@ -19,4 +20,5 @@ config.head_model = functools.partial(head_model, config)
 config.actor_model = functools.partial(actor_model, config)
 config.critic_model = functools.partial(critic_model, config)
 
-scores = train(config)
+# scores = train(config)
+

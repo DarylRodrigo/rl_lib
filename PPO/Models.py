@@ -42,21 +42,3 @@ class ActorCritic(nn.Module):
     logits = F.softmax(logits, dim=-1) 
     probs = Categorical(logits)
     return action, probs.log_prob(action), value, probs.entropy()
-
-def head_model(config):
-  return nn.Sequential(
-    nn.Linear(config.state_space, config.hidden_size),
-    nn.ReLU()
-  )
-
-def actor_model(config):
-  return nn.Sequential(
-    nn.Linear(config.hidden_size, config.hidden_size),
-    nn.ReLU()
-  )
-
-def critic_model(config):
-  return nn.Sequential(
-    nn.Linear(config.hidden_size, config.hidden_size),
-    nn.ReLU()
-  )

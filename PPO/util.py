@@ -6,7 +6,6 @@ from collections import deque
 from PPO import PPO
 from Config import Config
 
-
 def train(config):
   env = copy.deepcopy(config.env)
   steps = 0
@@ -22,7 +21,7 @@ def train(config):
     for t in range(config.max_t):
       steps += 1
 
-      action, log_prob = agent.act(torch.FloatTensor(state))
+      action, log_prob = agent.act(torch.FloatTensor(state).unsqueeze(dim=0))
       next_state, reward, done, _ = env.step(action.item())
 
       agent.mem.add(torch.FloatTensor(state), action, reward, log_prob, done)

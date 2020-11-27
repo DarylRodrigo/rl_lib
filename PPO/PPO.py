@@ -3,6 +3,7 @@ import torch.optim as optim
 import torch.nn.functional as F
 import copy
 import pdb
+import numpy as np
 
 class PPO:
   def __init__(self, config):
@@ -41,6 +42,8 @@ class PPO:
     discounted_returns = torch.FloatTensor(discounted_returns).to(self.device)
     discounted_returns = (discounted_returns - discounted_returns.mean()) / (discounted_returns.std() + 1e-5)
 
+    # prev_states = torch.stack(self.mem.states).to(self.device).squeeze().detach()
+    # pdb.set_trace()
     prev_states = torch.stack(self.mem.states).to(self.device).detach()
     prev_actions = torch.stack(self.mem.actions).to(self.device).detach()
     prev_log_probs = torch.stack(self.mem.log_probs).to(self.device).detach()
