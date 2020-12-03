@@ -5,7 +5,7 @@ import copy
 import pdb
 import numpy as np
 
-class PPO:
+class PPOBase:
   def __init__(self, config):
     self.mem = config.Memory()
 
@@ -13,8 +13,6 @@ class PPO:
     self.epsilon = config.epsilon
     self.entropy_beta = config.entropy_beta
     self.device = config.device
-
-    hidden_size = 64
 
     self.model = config.Model(config).to(self.device)
     self.model_old = config.Model(config).to(self.device)
@@ -25,6 +23,19 @@ class PPO:
   
   def act(self, x):
     return self.model_old.act(x)
+  
+  def add_to_mem(self, state, action, reward, log_prob, done):
+    raise NotImplemented
+
+  def learn(self, num_learn):
+    raise NotImplemented
+
+class PPOClassical(PPOBase):
+  def __init__(self, config):
+    super(PPOClassical, self).__init__(config)
+  
+  def add_to_mem(self, state, action, reward, log_prob, done):
+    self.mem.add(state, action, reward, log_prob, done)
 
   def learn(self, num_learn):
     # Calculate discounted rewards
@@ -42,17 +53,20 @@ class PPO:
     discounted_returns = torch.FloatTensor(discounted_returns).to(self.device)
     discounted_returns = (discounted_returns - discounted_returns.mean()) / (discounted_returns.std() + 1e-5)
 
-    # prev_states = torch.stack(self.mem.states).to(self.device).squeeze().detach()
-    # pdb.set_trace()
     prev_states = torch.stack(self.mem.states).to(self.device).detach()
+    # print("Previous states shape: {}".format(prev_states.shape))
     prev_actions = torch.stack(self.mem.actions).to(self.device).detach()
+    # print("prev_actions shape: {}".format(prev_actions.shape))
     prev_log_probs = torch.stack(self.mem.log_probs).to(self.device).detach()
 
     for i in range(num_learn):
 
       # find ratios
       actions, log_probs, values, entropy = self.model.evaluate(prev_states, prev_actions)
+      # print("Actions shape {}".format(actions.shape))
+      # print("log_probs shape {}".format(log_probs.shape))
       ratio = torch.exp(log_probs - prev_log_probs.detach())
+      # print("ratio shape {}".format(log_probs.shape))
 
       # calculate advantage
       advantage = discounted_returns - values.cpu().detach()

@@ -4,20 +4,15 @@ import torch
 from Config import Config
 import pdb
 
+# TODO:
+# - Layer initialisation
+
 class cnn_head_model(nn.Module):
   def __init__(self, config):
     # Call inheritance
     super(cnn_head_model, self).__init__()
     self.config = config
-
-  def forward(self, state):
-    # pdb.set_trace()
-    state = np.array(state).transpose((0, 3, 1, 2))
-    state = torch.from_numpy(state)
-    # state = state.unsqueeze(0).float() / 256
-    state = state.float() / 256
-
-    head = nn.Sequential(
+    self.head = nn.Sequential(
       nn.Conv2d(4, 32, kernel_size=8, stride=4),
       nn.BatchNorm2d(32),
       nn.ReLU(),
@@ -31,7 +26,9 @@ class cnn_head_model(nn.Module):
       nn.Linear(64 * 7 * 7, self.config.hidden_size),
       nn.ReLU(),
     )
-    return head(state)
+
+  def forward(self, state):
+    return self.head(state)
 
 def head_model(config: Config) -> nn.Sequential:
   return nn.Sequential(

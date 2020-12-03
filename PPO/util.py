@@ -3,17 +3,19 @@ import gym
 import torch
 import numpy as np
 from collections import deque
-from PPO import PPO
+from PPO import PPOClassical
 from Config import Config
+import pdb
 
 def train(config):
   env = copy.deepcopy(config.env)
   steps = 0
   scores_deque = deque(maxlen=100)
   scores = []
+  average_scores = []
   max_score = -np.Inf
 
-  agent = PPO(config)
+  agent = PPOClassical(config)
 
   for i_episode in range(1, config.n_episodes+1):
     state = env.reset()
@@ -21,18 +23,14 @@ def train(config):
     for t in range(config.max_t):
       steps += 1
 
-      action, log_prob = agent.act(torch.FloatTensor(state).unsqueeze(dim=0))
+      action, log_prob = agent.act(torch.FloatTensor(state))
       next_state, reward, done, _ = env.step(action.item())
 
-      agent.mem.add(torch.FloatTensor(state), action, reward, log_prob, done)
+      agent.add_to_mem(torch.FloatTensor(state), action, reward, log_prob, done)
 
       # Update 
       state = next_state
       score += reward
-
-      # Book Keeping
-      scores_deque.append(score)
-      scores.append(score)
 
       if steps >= config.update_every:
         agent.learn(config.num_learn)
@@ -41,6 +39,12 @@ def train(config):
 
       if done:
         break 
+
+    # Book Keeping
+    scores_deque.append(score)
+    scores.append(score)
+    average_scores.append(np.mean(scores_deque))
+    
       
     if i_episode % 10 == 0:
       print("\rEpisode {}	Average Score: {:.2f}	Score: {:.2f}".format(i_episode, np.mean(scores_deque), score), end="")
@@ -48,7 +52,7 @@ def train(config):
       print("\rEpisode {}	Average Score: {:.2f}".format(i_episode, np.mean(scores_deque)))   
     
     if np.mean(scores_deque) > config.win_condition:
-      print("\rEnvironment Solved!")
+      print("\nEnvironment Solved!")
       break
 
-  return scores
+  return scores, average_scores

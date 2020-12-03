@@ -109,7 +109,7 @@ class PPO:
       # advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-5)
 
       # calculate discounted returns
-      pdb.set_trace()
+      # pdb.set_trace()
       discounted_returns = advantage + values
       # calculate surrogates
       surrogate_1 = ratio * advantage
