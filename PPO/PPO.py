@@ -108,17 +108,33 @@ class PPOPixel(PPOBase):
     x = self.state_shaper(x).to(self.config.device)
     return self.model_old.act(x)
 
-  def learn(self, num_learn):
+  def learn(self, num_learn, last_value, next_done):
     # Calculate discounted rewards
-    discounted_returns = []
-    running_reward = 0
+    # discounted_returns = []
+    # running_reward = 0
 
-    for reward, done in zip(reversed(self.mem.rewards), reversed(self.mem.dones)):
-      if done:
-        running_reward = 0
-      running_reward = reward + self.gamma * running_reward
+    # for reward, done in zip(reversed(self.mem.rewards), reversed(self.mem.dones)):
+    #   if done:
+    #     running_reward = 0
+    #   running_reward = reward + self.gamma * running_reward
 
-      discounted_returns.insert(0,running_reward)
+    #   discounted_returns.insert(0,running_reward)
+
+    bootstrap_length = self.config.update_every
+    discounted_returns = torch.zeros(bootstrap_length)
+    for t in reversed(range(bootstrap_length)):
+      # If first loop
+      if t == bootstrap_length - 1:
+        nextnonterminal = 1.0 - next_done
+        next_return = last_value
+      else:
+        nextnonterminal = 1.0 - self.mem.dones[t+1]
+        next_return = discounted_returns[t+1]
+      discounted_returns[t] = self.mem.rewards[t] + self.gamma * nextnonterminal * next_return
+
+    # advantages = discounted_returns - values
+    
+    # pdb.set_trace()
 
     # normalise rewards
     discounted_returns = torch.FloatTensor(discounted_returns).to(self.device)
@@ -138,8 +154,9 @@ class PPOPixel(PPOBase):
       # Stats
       approx_kl = (log_probs - prev_log_probs).mean()
 
-      # calculate advantage
+      # calculate advantage & normalise
       advantage = discounted_returns - values
+      advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-5)
 
       # calculate surrogates
       surrogate_1 = ratio * advantage
@@ -148,8 +165,6 @@ class PPOPixel(PPOBase):
       # Calculate losses
       value_loss = F.mse_loss(values, discounted_returns)
       pg_loss = -torch.min(surrogate_1, surrogate_2).mean()
-
-      pdb.set_trace()
 
       loss = pg_loss + value_loss - self.entropy_beta*entropy
       loss = loss.mean()
