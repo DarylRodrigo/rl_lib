@@ -10,6 +10,7 @@ class Config:
     self.win_condition = None
 
     self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    print("Running experiment with device: {}".format(self.device))
     self.seed = 123456789
 
     self.n_episodes = 2000
@@ -19,8 +20,6 @@ class Config:
     self.eps_start = 1.0
     self.eps_end = 0.01
     self.eps_decay = 0.995
-
-    self.eps_greedy = True
 
     self.gamma = 0.99
     self.lr = 5e-4

@@ -73,7 +73,7 @@ class PPOClassical(PPOBase):
       # print("ratio shape {}".format(log_probs.shape))
 
       # calculate advantage
-      advantage = discounted_returns - values.cpu().detach()
+      advantage = discounted_returns - values
 
       # calculate surrogates
       surrogate_1 = ratio * advantage
@@ -107,7 +107,7 @@ class PPOPixel(PPOBase):
     self.mem.add(state, action, reward, log_prob, done)
   
   def act(self, x):
-    x = self.state_shaper(x)
+    x = self.state_shaper(x).to(self.config.device)
     return self.model_old.act(x)
 
   def learn(self, num_learn):
@@ -136,7 +136,7 @@ class PPOPixel(PPOBase):
       actions, log_probs, values, entropy = self.model.act(prev_states, prev_actions)
       ratio = torch.exp(log_probs - prev_log_probs.detach())
 
-      values = values.squeeze().cpu().detach()
+      values = values.squeeze()
 
       # calculate advantage
       advantage = discounted_returns - values
