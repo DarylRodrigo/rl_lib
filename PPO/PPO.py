@@ -35,6 +35,7 @@ class PPOClassical(PPOBase):
     super(PPOClassical, self).__init__(config)
   
   def act(self, x):
+    x = torch.FloatTensor(x)
     return self.model_old.act(x)
   
   def add_to_mem(self, state, action, reward, log_prob, done):
@@ -58,22 +59,19 @@ class PPOClassical(PPOBase):
     discounted_returns = (discounted_returns - discounted_returns.mean()) / (discounted_returns.std() + 1e-5)
 
     prev_states = torch.stack(self.mem.states).to(self.device).detach()
-    # print("Previous states shape: {}".format(prev_states.shape))
     prev_actions = torch.stack(self.mem.actions).to(self.device).detach()
-    # print("prev_actions shape: {}".format(prev_actions.shape))
     prev_log_probs = torch.stack(self.mem.log_probs).to(self.device).detach()
 
     for i in range(num_learn):
 
       # find ratios
       actions, log_probs, values, entropy = self.model.act(prev_states, prev_actions)
-      # print("Actions shape {}".format(actions.shape))
-      # print("log_probs shape {}".format(log_probs.shape))
       ratio = torch.exp(log_probs - prev_log_probs.detach())
-      # print("ratio shape {}".format(log_probs.shape))
 
       # calculate advantage
       advantage = discounted_returns - values
+
+      # TODO: normalise advantages
 
       # calculate surrogates
       surrogate_1 = ratio * advantage
@@ -135,17 +133,25 @@ class PPOPixel(PPOBase):
       # find ratios
       actions, log_probs, values, entropy = self.model.act(prev_states, prev_actions)
       ratio = torch.exp(log_probs - prev_log_probs.detach())
-
       values = values.squeeze()
+
+      # Stats
+      approx_kl = (log_probs - prev_log_probs).mean()
 
       # calculate advantage
       advantage = discounted_returns - values
 
-      # calculate surrogatesadv
+      # calculate surrogates
       surrogate_1 = ratio * advantage
       surrogate_2 = torch.clamp(advantage, 1-self.epsilon, 1+self.epsilon)
 
-      loss = -torch.min(surrogate_1, surrogate_2) + F.mse_loss(values, discounted_returns) - self.entropy_beta*entropy
+      # Calculate losses
+      value_loss = F.mse_loss(values, discounted_returns)
+      pg_loss = -torch.min(surrogate_1, surrogate_2).mean()
+
+      pdb.set_trace()
+
+      loss = pg_loss + value_loss - self.entropy_beta*entropy
       loss = loss.mean()
 
       # calculate gradient
@@ -154,3 +160,5 @@ class PPOPixel(PPOBase):
       self.optimiser.step()
     
     self.model_old.load_state_dict(self.model.state_dict())
+
+    return value_loss, pg_loss, approx_kl

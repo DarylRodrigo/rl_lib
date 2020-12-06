@@ -1,7 +1,7 @@
 import functools
 import gym
 from Config import Config
-from util import train
+from util import train_pixel
 from Models import ActorCritic
 from Networks import cnn_head_model, actor_model, critic_model, head_model
 from Memory import Memory
@@ -28,6 +28,6 @@ config.head_model = functools.partial(cnn_head_model, config)
 config.actor_model = functools.partial(actor_model, config)
 config.critic_model = functools.partial(critic_model, config)
 
-scores = train(config)
+scores = train_pixel(config)
 plt.plot(scores)
 plt.show()

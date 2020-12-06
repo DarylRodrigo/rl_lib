@@ -37,4 +37,4 @@ class Config:
     self.save_loc = None
   
   def print_config(self):
-     pprint(vars(self))
+    pprint(vars(self))

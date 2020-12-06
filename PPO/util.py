@@ -3,7 +3,7 @@ import gym
 import torch
 import numpy as np
 from collections import deque
-from PPO import PPOClassical
+from PPO import PPOClassical, PPOPixel
 from Config import Config
 import pdb
 
@@ -56,3 +56,46 @@ def train(config):
       break
 
   return scores, average_scores
+
+def train_pixel(config):
+  env = copy.deepcopy(config.env)
+  steps = 0
+  scores_deque = deque(maxlen=100)
+  scores = []
+  average_scores = []
+  max_score = -np.Inf
+  global_step = 0
+
+  agent = PPOPixel(config)
+
+  while global_step < 100000000:
+    state = env.reset()
+    score = 0
+    for t in range(config.update_every):
+      steps += 1
+      global_step += 1
+
+      action, log_prob, value, entr = agent.act(state)
+      next_state, reward, done, info = env.step(action)
+      agent.add_to_mem(state, action, reward, log_prob, done)
+
+      # Update 
+      state = next_state
+      score += reward
+
+      if steps >= config.update_every:
+        value_loss, pg_loss, approx_kl = agent.learn(config.num_learn)
+        agent.mem.clear()
+        steps = 0
+      
+
+    # Book Keeping
+    scores_deque.append(score)
+    scores.append(score)
+    average_scores.append(np.mean(scores_deque))
+
+    print("Global Step: {}	Average Score: {:.2f}".format(global_step, np.mean(scores_deque)))  
+
+  return scores, average_scores
+
+
