@@ -1,6 +1,7 @@
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions import Categorical
+import pdb
 
 
 class ActorCritic(nn.Module):
@@ -27,18 +28,10 @@ class ActorCritic(nn.Module):
     value = self.critic(x)
     action = self.actor(x)
     return action, value
-
-  def act(self, x):
-    logits, value = self.forward(x)
-
-    logits = F.softmax(logits, dim=-1)
-    probs = Categorical(logits)
-    action = probs.sample()
-
-    return action, probs.log_prob(action)
   
-  def evaluate(self, state, action):
-    logits, value = self.forward(state)
-    logits = F.softmax(logits, dim=-1) 
-    probs = Categorical(logits)
+  def act(self, x, action=None):
+    logits, value = self.forward(x)
+    probs = Categorical(logits=logits)
+    if action is None:
+      action = probs.sample()
     return action, probs.log_prob(action), value, probs.entropy()

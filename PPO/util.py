@@ -26,7 +26,7 @@ def train(config):
       action, log_prob = agent.act(torch.FloatTensor(state))
       next_state, reward, done, _ = env.step(action.item())
 
-      agent.add_to_mem(torch.FloatTensor(state), action, reward, log_prob, done)
+      agent.add_to_mem(state, action, reward, log_prob, done)
 
       # Update 
       state = next_state

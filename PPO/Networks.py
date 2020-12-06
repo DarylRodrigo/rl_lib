@@ -14,13 +14,13 @@ class cnn_head_model(nn.Module):
     self.config = config
     self.head = nn.Sequential(
       nn.Conv2d(4, 32, kernel_size=8, stride=4),
-      nn.BatchNorm2d(32),
+      # nn.BatchNorm2d(32),
       nn.ReLU(),
       nn.Conv2d(32, 64, kernel_size=4, stride=2),
-      nn.BatchNorm2d(64),
+      # nn.BatchNorm2d(64),
       nn.ReLU(),
       nn.Conv2d(64, 64, kernel_size=3, stride=1),
-      nn.BatchNorm2d(64),
+      # nn.BatchNorm2d(64),
       nn.ReLU(),
       nn.Flatten(),
       nn.Linear(64 * 7 * 7, self.config.hidden_size),
