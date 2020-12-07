@@ -5,7 +5,8 @@ from util import train_pixel
 from Models import ActorCritic
 from Networks import cnn_head_model, actor_model, critic_model, head_model
 from Memory import Memory
-from baselines.common.cmd_util import make_env
+import time
+from torch.utils.tensorboard import SummaryWriter
 from baselines.common.atari_wrappers import wrap_deepmind, make_atari
 
 import matplotlib.pyplot as plt
