@@ -1,6 +1,7 @@
 import torch
 import torch.optim as optim
 import torch.nn.functional as F
+import torch.nn as nn
 import copy
 import pdb
 import numpy as np
