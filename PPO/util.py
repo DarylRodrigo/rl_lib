@@ -68,38 +68,44 @@ def train_pixel(config):
 
   agent = PPOPixel(config)
 
-  while global_step < 10000000:
-    state = env.reset()
-    score = 0
-    for t in range(config.update_every):
-      steps += 1
-      global_step += 1
+ while global_step < 10000000:
+  state = env.reset()
+  score = 0
+  value, done = None, None
+  
+  for t in range(config.update_every):
+    steps += 1
+    global_step += 1
 
-      action, log_prob, value, entr = agent.act(state)
-      next_state, reward, done, info = env.step(action)
-      agent.add_to_mem(state, action, reward, log_prob, done)
+    action, log_prob, value, entr = agent.act(state)
+    next_state, reward, done, info = env.step(action)
+    agent.add_to_mem(state, action, reward, log_prob, done)
 
-      # Update 
-      state = next_state
-      score += reward
+    # Update 
+    state = next_state
+    score += reward
 
-      if steps >= config.update_every:
-        value_loss, pg_loss, approx_kl = agent.learn(config.num_learn)
-        agent.mem.clear()
-        steps = 0
+    if (info["ale.lives"] == 0 and done):
+      state = env.reset()
+
+  # update and learn
+  value_loss, pg_loss, approx_kl = agent.learn(config.num_learn, value.item(), done)
+  agent.mem.clear()
+  steps = 0
       
 
-    # Book Keeping
-    scores_deque.append(score)
-    scores.append(score)
-    average_scores.append(np.mean(scores_deque))
+  # Book Keeping
+  scores_deque.append(score)
+  scores.append(score)
+  average_scores.append(np.mean(scores_deque))
+  
+  config.tb_logger.add_scalar("charts/episode_reward", score, global_step)
+  config.tb_logger.add_scalar("losses/value_loss", value_loss.item(), global_step)
+  config.tb_logger.add_scalar("losses/policy_loss", pg_loss.item(), global_step)
+  config.tb_logger.add_scalar("losses/approx_kl", approx_kl.item(), global_step)
 
-    config.tb_logger.add_scalar("charts/episode_reward", score, global_step)
-    config.tb_logger.add_scalar("losses/value_loss", value_loss.item(), global_step)
-    config.tb_logger.add_scalar("losses/policy_loss", pg_loss.item(), global_step)
-    config.tb_logger.add_scalar("losses/approx_kl", approx_kl.item(), global_step)
-
-    print("Global Step: {}	Average Score: {:.2f}".format(global_step, np.mean(scores_deque)))  
+  print("Global Step: {}	Average Score: {:.2f}".format(global_step, np.mean(scores_deque)))   
+    
 
   return scores, average_scores
 
