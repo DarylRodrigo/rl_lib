@@ -16,7 +16,7 @@ class Config:
     self.n_episodes = 2000
     self.max_t = 1000
     # TODO set as decaying and pass into learn from PPO
-    self.epsilon = 0.2
+    self.epsilon = 0.1
     self.eps_start = 1.0
     self.eps_end = 0.01
     self.eps_decay = 0.995

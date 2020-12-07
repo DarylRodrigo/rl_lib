@@ -127,6 +127,7 @@ class PPOPixel(PPOBase):
     discounted_returns = torch.FloatTensor(discounted_returns).to(self.device)
     discounted_returns = (discounted_returns - discounted_returns.mean()) / (discounted_returns.std() + 1e-8)
     
+    # Fetch collected state, action and log_probs from memory & reshape for nn
     prev_states = torch.stack(self.mem.states).reshape((-1,)+(4, 84, 84)).to(self.device).detach()
     prev_actions = torch.stack(self.mem.actions).reshape(-1).to(self.device).detach()
     prev_log_probs = torch.stack(self.mem.log_probs).reshape(-1).to(self.device).detach()
@@ -136,7 +137,7 @@ class PPOPixel(PPOBase):
       # find ratios
       actions, log_probs, values, entropy = self.model.act(prev_states, prev_actions)
       ratio = torch.exp(log_probs - prev_log_probs.detach())
-      values = values.squeeze()
+      values = values.squeeze() * 0.5
 
       # Stats
       approx_kl = (prev_log_probs - log_probs).mean()
