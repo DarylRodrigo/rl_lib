@@ -22,6 +22,7 @@ config.num_learn = 4
 config.win_condition = 230
 config.n_episodes = 2000
 config.max_t = 700
+config.hidden_size = 512
 
 config.Memory = Memory
 config.Model = ActorCritic

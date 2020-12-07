@@ -139,7 +139,7 @@ class PPOPixel(PPOBase):
       values = values.squeeze()
 
       # Stats
-      approx_kl = (log_probs - prev_log_probs).mean()
+      approx_kl = (prev_log_probs - log_probs).mean()
 
       # calculate advantage & normalise
       advantage = discounted_returns - values
@@ -161,6 +161,9 @@ class PPOPixel(PPOBase):
       loss.backward()
       nn.utils.clip_grad_norm_(self.model_old.parameters(), 0.5)
       self.optimiser.step()
+
+      if torch.abs(approx_kl) > 0.03:
+        break
     
     self.model_old.load_state_dict(self.model.state_dict())
 
