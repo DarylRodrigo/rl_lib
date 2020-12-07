@@ -110,16 +110,6 @@ class PPOPixel(PPOBase):
 
   def learn(self, num_learn, last_value, next_done):
     # Calculate discounted rewards
-    # discounted_returns = []
-    # running_reward = 0
-
-    # for reward, done in zip(reversed(self.mem.rewards), reversed(self.mem.dones)):
-    #   if done:
-    #     running_reward = 0
-    #   running_reward = reward + self.gamma * running_reward
-
-    #   discounted_returns.insert(0,running_reward)
-
     bootstrap_length = self.config.update_every
     discounted_returns = torch.zeros(bootstrap_length)
     for t in reversed(range(bootstrap_length)):
@@ -132,13 +122,9 @@ class PPOPixel(PPOBase):
         next_return = discounted_returns[t+1]
       discounted_returns[t] = self.mem.rewards[t] + self.gamma * nextnonterminal * next_return
 
-    # advantages = discounted_returns - values
-    
-    # pdb.set_trace()
-
     # normalise rewards
     discounted_returns = torch.FloatTensor(discounted_returns).to(self.device)
-    discounted_returns = (discounted_returns - discounted_returns.mean()) / (discounted_returns.std() + 1e-5)
+    discounted_returns = (discounted_returns - discounted_returns.mean()) / (discounted_returns.std() + 1e-8)
     
     prev_states = torch.stack(self.mem.states).reshape((-1,)+(4, 84, 84)).to(self.device).detach()
     prev_actions = torch.stack(self.mem.actions).reshape(-1).to(self.device).detach()
@@ -156,7 +142,7 @@ class PPOPixel(PPOBase):
 
       # calculate advantage & normalise
       advantage = discounted_returns - values
-      advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-5)
+      advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-8)
 
       # calculate surrogates
       surrogate_1 = ratio * advantage
@@ -172,6 +158,7 @@ class PPOPixel(PPOBase):
       # calculate gradient
       self.optimiser.zero_grad()
       loss.backward()
+      nn.utils.clip_grad_norm_(self.model_old.parameters(), 0.5)
       self.optimiser.step()
     
     self.model_old.load_state_dict(self.model.state_dict())

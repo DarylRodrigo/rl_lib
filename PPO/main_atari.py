@@ -28,6 +28,9 @@ config.head_model = functools.partial(cnn_head_model, config)
 config.actor_model = functools.partial(actor_model, config)
 config.critic_model = functools.partial(critic_model, config)
 
+experiment_name = f"{env_id}____{int(time.time())}"
+config.tb_logger = SummaryWriter(f"runs/{experiment_name}")
+
 scores = train_pixel(config)
 plt.plot(scores)
 plt.show()

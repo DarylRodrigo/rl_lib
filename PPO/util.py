@@ -68,7 +68,7 @@ def train_pixel(config):
 
   agent = PPOPixel(config)
 
-  while global_step < 100000000:
+  while global_step < 10000000:
     state = env.reset()
     score = 0
     for t in range(config.update_every):
@@ -93,6 +93,11 @@ def train_pixel(config):
     scores_deque.append(score)
     scores.append(score)
     average_scores.append(np.mean(scores_deque))
+
+    config.tb_logger.add_scalar("charts/episode_reward", score, global_step)
+    config.tb_logger.add_scalar("losses/value_loss", value_loss.item(), global_step)
+    config.tb_logger.add_scalar("losses/policy_loss", pg_loss.item(), global_step)
+    config.tb_logger.add_scalar("losses/approx_kl", approx_kl.item(), global_step)
 
     print("Global Step: {}	Average Score: {:.2f}".format(global_step, np.mean(scores_deque)))  
 
