@@ -6,6 +6,7 @@ logs/
 dqn-complex-logs/
 dqn-save-points/
 dqn-static-logs/
+/run/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
