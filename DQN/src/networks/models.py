@@ -1,6 +1,5 @@
 import math
 import numpy as np
-import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -167,6 +166,46 @@ class DualingQNetwork(nn.Module):
 
   def forward(self, state):
     x = self.feature(state)
+    
+    advantage = self.advantage(x)
+    value = self.value(x)
+
+    x = value + advantage - advantage.mean()
+
+    return x
+
+class DualingLSTMQNetwork(nn.Module):
+  def __init__(self, state_size, action_size, seed, fc1_units=64, fc2_units=64):
+    # Call inheritance
+    super(DualingQNetwork, self).__init__()
+    self.seed = torch.manual_seed(1234)
+
+    self.feature = nn.Sequential(
+      nn.Linear(state_size, fc1_units),
+      nn.ReLU()
+    )
+
+    # LSTM Cells
+    self.lstm = nn.LSTMCell(1024, 512)
+
+    self.advantage = nn.Sequential(
+      nn.Linear(fc1_units, fc2_units),
+      nn.ReLU(),
+      nn.Linear(fc2_units, action_size)
+    )
+
+    self.value = nn.Sequential(
+      nn.Linear(fc1_units, fc2_units),
+      nn.ReLU(),
+      nn.Linear(fc2_units, 1)
+    )
+
+  def forward(self, state):
+    x = self.feature(state)
+
+    x = x.view(x.size(0), -1)
+    hx, cx = self.lstm(x, (hx, cx))
+    x = hx
     
     advantage = self.advantage(x)
     value = self.value(x)
