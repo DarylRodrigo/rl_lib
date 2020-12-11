@@ -42,7 +42,7 @@ class Config:
   def print_config(self):
     pprint(vars(self))
   
-  def init_wnb(self, project="rl-lib", entity="procgen"):
+  def init_wandb(self, project="rl-lib", entity="procgen"):
     wandb.init(project="rl-lib", entity="procgen")
 
     wandb.config.update({
