@@ -94,6 +94,7 @@ def train_pixel(config):
 
       if (info["ale.lives"] == 0 and done):
         state = env.reset()
+        config.tb_logger.add_scalar("charts/episode_reward", score, global_step)
 
     # update and learn
     value_loss, pg_loss, approx_kl, approx_entropy = agent.learn(config.num_learn, value.item(), done)
@@ -106,7 +107,6 @@ def train_pixel(config):
     scores.append(score)
     average_scores.append(np.mean(scores_deque))
     
-    config.tb_logger.add_scalar("charts/episode_reward", score, global_step)
     config.tb_logger.add_scalar("losses/value_loss", value_loss.item(), global_step)
     config.tb_logger.add_scalar("losses/policy_loss", pg_loss.item(), global_step)
     config.tb_logger.add_scalar("losses/approx_kl", approx_kl.item(), global_step)
