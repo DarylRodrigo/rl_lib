@@ -93,6 +93,7 @@ def train_pixel(config):
       score += reward
 
       if (info["ale.lives"] == 0 and done):
+        score = 0
         state = env.reset()
         config.tb_logger.add_scalar("charts/episode_reward", score, global_step)
 
