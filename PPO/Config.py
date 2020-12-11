@@ -1,4 +1,5 @@
 from pprint import pprint
+import wandb
 import torch
 
 class Config:
@@ -13,8 +14,9 @@ class Config:
     print("Running experiment with device: {}".format(self.device))
     self.seed = 123456789
 
+    self.n_steps = 7000000
     self.n_episodes = 2000
-    self.max_t = 1000
+    self.max_t = 100
     # TODO set as decaying and pass into learn from PPO
     self.epsilon = 0.1
     self.eps_start = 1.0
@@ -34,7 +36,32 @@ class Config:
 
     self.model = None
 
+    self.wandb = False
     self.save_loc = None
   
   def print_config(self):
     pprint(vars(self))
+  
+  def init_wnb(self, project="rl-lib", entity="procgen"):
+    wandb.init(project="rl-lib", entity="procgen")
+
+    wandb.config.update({
+      "seed": self.seed,
+      "n_episodes": self.n_episodes,
+      "max_t": self.max_t,
+      "epsilon": self.epsilon,
+      "eps_start": self.eps_start,
+      "eps_end": self.eps_end,
+      "eps_decay": self.eps_decay,
+      "gamma": self.gamma,
+      "lr": self.lr,
+      "hidden_size": self.hidden_size,
+      "batch_size": self.batch_size,
+      "buffer_size": self.buffer_size,
+      "lr_annealing": self.lr_annealing,
+      "learn_every": self.learn_every,
+      "entropy_beta": self.entropy_beta
+    })
+
+    self.wandb = True
+

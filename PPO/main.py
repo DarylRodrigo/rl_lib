@@ -12,14 +12,15 @@ config = Config(gym.make('CartPole-v1'))
 config.update_every = 50
 config.num_learn = 4
 config.win_condition = 400
-config.n_episodes = 2000
 config.max_t = 700
 
-config.Memory = Memory
-config.Model = ActorCritic
+config.memory = Memory
 config.head_model = functools.partial(head_model, config)
 config.actor_model = functools.partial(actor_model, config)
 config.critic_model = functools.partial(critic_model, config)
+config.model = ActorCritic
+
+config.init_wnb()
 
 scores, average_scores = train(config)
 

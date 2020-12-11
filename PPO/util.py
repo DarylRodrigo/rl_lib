@@ -6,6 +6,7 @@ from collections import deque
 from PPO import PPOClassical, PPOPixel
 from Config import Config
 import pdb
+import wandb
 
 def train(config):
   env = copy.deepcopy(config.env)
@@ -16,6 +17,9 @@ def train(config):
   max_score = -np.Inf
 
   agent = PPOClassical(config)
+  
+  if config.wandb:
+    wandb.watch(agent.model)
 
   for i_episode in range(1, config.n_episodes+1):
     state = env.reset()
@@ -68,7 +72,10 @@ def train_pixel(config):
 
   agent = PPOPixel(config)
 
-  while global_step < 10000000:
+  if config.wandb:
+    wandb.watch(agent.model)
+
+  while global_step < config.n_steps:
     state = env.reset()
     score = 0
     value, done = None, None
@@ -89,7 +96,7 @@ def train_pixel(config):
         state = env.reset()
 
     # update and learn
-    value_loss, pg_loss, approx_kl = agent.learn(config.num_learn, value.item(), done)
+    value_loss, pg_loss, approx_kl, approx_entropy = agent.learn(config.num_learn, value.item(), done)
     agent.mem.clear()
     steps = 0
         
@@ -103,6 +110,18 @@ def train_pixel(config):
     config.tb_logger.add_scalar("losses/value_loss", value_loss.item(), global_step)
     config.tb_logger.add_scalar("losses/policy_loss", pg_loss.item(), global_step)
     config.tb_logger.add_scalar("losses/approx_kl", approx_kl.item(), global_step)
+    config.tb_logger.add_scalar("losses/approx_entropy", approx_entropy.item(), global_step)
+
+    if config.wandb:
+      wandb.log({
+        "episode_reward": score,
+        "value_loss": value_loss,
+        "policy_loss": pg_loss,
+        "approx_kl": approx_kl,
+        "approx_entropy": approx_entropy,
+        "global_step": global_step
+       })
+
 
     print("Global Step: {}	Average Score: {:.2f}".format(global_step, np.mean(scores_deque)))   
       

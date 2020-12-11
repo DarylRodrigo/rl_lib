@@ -20,15 +20,16 @@ config = Config(env)
 config.update_every = 2000
 config.num_learn = 4
 config.win_condition = 230
-config.n_episodes = 2000
-config.max_t = 700
+config.n_steps = 7000000
 config.hidden_size = 512
 
-config.Memory = Memory
-config.Model = ActorCritic
+config.memory = Memory
+config.model = ActorCritic
 config.head_model = functools.partial(cnn_head_model, config)
 config.actor_model = functools.partial(actor_model, config)
 config.critic_model = functools.partial(critic_model, config)
+
+config.init_wnb()
 
 experiment_name = f"{env_id}____{int(time.time())}"
 config.tb_logger = SummaryWriter(f"runs/{experiment_name}")
