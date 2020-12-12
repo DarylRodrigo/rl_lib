@@ -93,9 +93,15 @@ def train_pixel(config):
       score += reward
 
       if (info["ale.lives"] == 0 and done):
+        config.tb_logger.add_scalar("charts/episode_reward", score, global_step)
+         if config.wandb:
+          wandb.log({
+            "episode_reward": score,
+            "global_step": global_step
+          })
+
         score = 0
         state = env.reset()
-        config.tb_logger.add_scalar("charts/episode_reward", score, global_step)
 
     # update and learn
     value_loss, pg_loss, approx_kl, approx_entropy = agent.learn(config.num_learn, value.item(), done)
@@ -115,7 +121,6 @@ def train_pixel(config):
 
     if config.wandb:
       wandb.log({
-        "episode_reward": score,
         "value_loss": value_loss,
         "policy_loss": pg_loss,
         "approx_kl": approx_kl,
