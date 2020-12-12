@@ -117,6 +117,8 @@ class PPOPixel(PPOBase):
       frac = 1.0 - (global_step - 1.0) / self.total_global_steps
       self.optimiser.param_groups[0]['lr'] = self.lr * frac
 
+    self.model_old.load_state_dict(self.model.state_dict())
+
     # Calculate discounted rewards
     bootstrap_length = self.config.update_every
     discounted_returns = torch.zeros(bootstrap_length)
@@ -169,12 +171,15 @@ class PPOPixel(PPOBase):
       # calculate gradient
       self.optimiser.zero_grad()
       loss.backward()
-      nn.utils.clip_grad_norm_(self.model_old.parameters(), 0.5)
+      nn.utils.clip_grad_norm_(self.model.parameters(), 0.5)
       self.optimiser.step()
 
       if torch.abs(approx_kl) > 0.03:
         break
-    
-    self.model_old.load_state_dict(self.model.state_dict())
+
+      _, new_log_probs, _, _ = self.model.act(prev_states, prev_actions)
+      if (prev_log_probs - new_log_probs).mean() > 0.03:
+        self.model.load_state_dict(self.model_old.state_dict())
+        break
 
     return value_loss, pg_loss, approx_kl
