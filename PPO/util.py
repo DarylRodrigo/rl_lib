@@ -112,10 +112,8 @@ def train_pixel(config):
     value_loss, pg_loss, approx_kl, approx_entropy = agent.learn(config.num_learn, value.item(), done)
     agent.mem.clear()
     steps = 0
-        
 
-
-    
+    # Book Keeping
     config.tb_logger.add_scalar("losses/value_loss", value_loss.item(), global_step)
     config.tb_logger.add_scalar("losses/policy_loss", pg_loss.item(), global_step)
     config.tb_logger.add_scalar("losses/approx_kl", approx_kl.item(), global_step)
