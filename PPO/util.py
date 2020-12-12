@@ -92,13 +92,18 @@ def train_pixel(config):
       state = next_state
       score += reward
 
+      # Book Keeping
       if (info["ale.lives"] == 0 and done):
         config.tb_logger.add_scalar("charts/episode_reward", score, global_step)
-         if config.wandb:
+        if config.wandb:
           wandb.log({
             "episode_reward": score,
             "global_step": global_step
           })
+        
+        scores_deque.append(score)
+        scores.append(score)
+        average_scores.append(np.mean(scores_deque))
 
         score = 0
         state = env.reset()
@@ -109,10 +114,7 @@ def train_pixel(config):
     steps = 0
         
 
-    # Book Keeping
-    scores_deque.append(score)
-    scores.append(score)
-    average_scores.append(np.mean(scores_deque))
+
     
     config.tb_logger.add_scalar("losses/value_loss", value_loss.item(), global_step)
     config.tb_logger.add_scalar("losses/policy_loss", pg_loss.item(), global_step)
