@@ -157,7 +157,10 @@ class PPOPixel(PPOBase):
       surrogate_2 = torch.clamp(advantage, 1-self.epsilon, 1+self.epsilon)
 
       # Calculate losses
-      value_loss = F.mse_loss(values, discounted_returns)
+      values_clipped = last_value + torch.clamp(values - last_value, -self.epsilon, self.epsilon)
+      value_loss_unclipped = F.mse_loss(values, discounted_returns)
+      value_loss_clipped = F.mse_loss(values_clipped, discounted_returns)
+      value_loss = .5 * torch.mean(torch.max(value_loss_clipped, value_loss_unclipped))
       pg_loss = -torch.min(surrogate_1, surrogate_2).mean()
 
       loss = pg_loss + value_loss - self.entropy_beta*entropy
