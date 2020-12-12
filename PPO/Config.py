@@ -13,6 +13,7 @@ class Config:
     print("Running experiment with device: {}".format(self.device))
     self.seed = 123456789
 
+    self.total_global_steps = 10e6
     self.n_episodes = 2000
     self.max_t = 1000
     # TODO set as decaying and pass into learn from PPO

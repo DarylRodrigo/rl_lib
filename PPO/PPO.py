@@ -10,6 +10,9 @@ class PPOBase:
   def __init__(self, config):
     self.mem = config.Memory()
 
+    self.lr = config.lr
+    self.total_global_steps = config.total_global_steps
+    self.lr_annealing = config.lr_annealing
     self.gamma = config.gamma
     self.epsilon = config.epsilon
     self.entropy_beta = config.entropy_beta
@@ -20,7 +23,7 @@ class PPOBase:
 
     self.model_old.load_state_dict(self.model.state_dict())
 
-    self.optimiser = optim.Adam(self.model.parameters(), lr=config.lr)
+    self.optimiser = optim.Adam(self.model.parameters(), lr=self.lr)
   
   def act(self, x):
     raise NotImplemented
@@ -64,7 +67,6 @@ class PPOClassical(PPOBase):
     prev_log_probs = torch.stack(self.mem.log_probs).to(self.device).detach()
 
     for i in range(num_learn):
-
       # find ratios
       actions, log_probs, values, entropy = self.model.act(prev_states, prev_actions)
       ratio = torch.exp(log_probs - prev_log_probs.detach())
@@ -109,7 +111,12 @@ class PPOPixel(PPOBase):
     x = self.state_shaper(x).to(self.config.device)
     return self.model_old.act(x)
 
-  def learn(self, num_learn, last_value, next_done):
+  def learn(self, num_learn, last_value, next_done, global_step):
+    # For reference: This is similar to how baselines and Costa are doing it.
+    if self.lr_annealing:
+      frac = 1.0 - (global_step - 1.0) / self.total_global_steps
+      self.optimiser.param_groups[0]['lr'] = self.lr * frac
+
     # Calculate discounted rewards
     bootstrap_length = self.config.update_every
     discounted_returns = torch.zeros(bootstrap_length)
@@ -133,7 +140,6 @@ class PPOPixel(PPOBase):
     prev_log_probs = torch.stack(self.mem.log_probs).reshape(-1).to(self.device).detach()
 
     for i in range(num_learn):
-
       # find ratios
       actions, log_probs, values, entropy = self.model.act(prev_states, prev_actions)
       ratio = torch.exp(log_probs - prev_log_probs.detach())

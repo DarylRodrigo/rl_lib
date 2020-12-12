@@ -17,12 +17,14 @@ env = wrap_deepmind(env, episode_life=True, clip_rewards=True, frame_stack=True,
 
 config = Config(env)
 
+config.total_global_steps = 10e6
 config.update_every = 2000
 config.num_learn = 4
 config.win_condition = 230
 config.n_episodes = 2000
-config.max_t = 700
+config.max_t = 2000
 config.hidden_size = 512
+config.lr_annealing = True
 
 config.Memory = Memory
 config.Model = ActorCritic
