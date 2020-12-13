@@ -161,7 +161,7 @@ class PPOPixel(PPOBase):
       # calculate gradient
       self.optimiser.zero_grad()
       loss.backward()
-      nn.utils.clip_grad_norm_(self.model_old.parameters(), 0.5)
+      nn.utils.clip_grad_norm_(self.model.parameters(), 0.5)
       self.optimiser.step()
 
       if torch.abs(approx_kl) > 0.03:
