@@ -1,0 +1,22 @@
+{
+    "os": "Darwin-20.1.0-x86_64-i386-64bit",
+    "python": "3.7.3",
+    "heartbeatAt": "2020-12-13T14:55:36.156305",
+    "startedAt": "2020-12-13T14:55:35.156955",
+    "docker": null,
+    "cpu_count": 8,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "codePath": "PPO/main_atari.py",
+    "program": "main_atari.py",
+    "git": {
+        "remote": "https://github.com/DarylRodrigo/rl_lib.git",
+        "commit": "dabdf349e70e622de00b7bf12c9caf310cc7b310"
+    },
+    "email": null,
+    "root": "/Users/darylrodrigo/Documents/projects/rl_lib",
+    "host": "Daryls-MacBook-Pro.local",
+    "username": "darylrodrigo",
+    "executable": "/Users/darylrodrigo/miniconda3/envs/train-procgen/bin/python3"
+}

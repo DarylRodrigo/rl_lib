@@ -1,0 +1,58 @@
+wandb_version: 1
+
+_wandb:
+  desc: null
+  value:
+    cli_version: 0.10.12
+    framework: torch
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    python_version: 3.7.3
+batch_size:
+  desc: null
+  value: 64
+buffer_size:
+  desc: null
+  value: 100000
+entropy_beta:
+  desc: null
+  value: 0.01
+eps_decay:
+  desc: null
+  value: 0.995
+eps_end:
+  desc: null
+  value: 0.01
+eps_start:
+  desc: null
+  value: 1.0
+epsilon:
+  desc: null
+  value: 0.1
+gamma:
+  desc: null
+  value: 0.99
+hidden_size:
+  desc: null
+  value: 512
+learn_every:
+  desc: null
+  value: 4
+lr:
+  desc: null
+  value: 1.0e-05
+lr_annealing:
+  desc: null
+  value: false
+max_t:
+  desc: null
+  value: 100
+n_episodes:
+  desc: null
+  value: 2000
+seed:
+  desc: null
+  value: 7456735
+update_every:
+  desc: null
+  value: 2000
