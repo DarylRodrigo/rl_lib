@@ -1,7 +1,8 @@
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions import Categorical
-import pdb
+from Networks import layer_init
+import pdb 
 
 
 class ActorCritic(nn.Module):
@@ -14,13 +15,13 @@ class ActorCritic(nn.Module):
     self.actor = config.actor_model()
     self.actor.add_module(
       "actor_linear",
-      nn.Linear(config.hidden_size, config.action_space)
+      layer_init(nn.Linear(config.hidden_size, config.action_space))
     )
 
     self.critic = config.critic_model()
     self.critic.add_module(
       "critic_linear",
-      nn.Linear(config.hidden_size, 1)
+      layer_init(nn.Linear(config.hidden_size, 1))
     )
 
   def forward(self, x):

@@ -7,6 +7,7 @@ dqn-complex-logs/
 dqn-save-points/
 dqn-static-logs/
 /runs/*
+/wandb/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
