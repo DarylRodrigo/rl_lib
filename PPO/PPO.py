@@ -140,7 +140,6 @@ class PPOPixel(PPOBase):
 
       # Stats
       approx_kl = (prev_log_probs - log_probs).mean()
-      approx_entropy = entropy.mean()
 
       # calculate advantage & normalise
       advantage = discounted_returns - values
@@ -153,8 +152,9 @@ class PPOPixel(PPOBase):
       # Calculate losses
       value_loss = F.mse_loss(values, discounted_returns)
       pg_loss = -torch.min(surrogate_1, surrogate_2).mean()
+      entropy_loss = entropy.mean()
 
-      loss = pg_loss + value_loss - self.entropy_beta*entropy
+      loss = pg_loss + value_loss - self.entropy_beta*entropy_loss
       loss = loss.mean()
 
 
@@ -169,4 +169,4 @@ class PPOPixel(PPOBase):
     
     self.model_old.load_state_dict(self.model.state_dict())
 
-    return value_loss, pg_loss, approx_kl, approx_entropy
+    return value_loss, pg_loss, approx_kl, entropy_loss
