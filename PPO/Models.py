@@ -71,3 +71,6 @@ class ActorCritic(nn.Module):
         if action is None:
             action = probs.sample()
         return action, probs.log_prob(action), values, probs.entropy()
+    
+    def get_value(self, x):
+        return self.critic(self.forward(x))

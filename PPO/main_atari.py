@@ -15,7 +15,7 @@ env = wrap_deepmind(env, episode_life=True, clip_rewards=True, frame_stack=True,
 
 config = Config(env, env_id)
 
-config.update_every = 2000
+config.update_every = 100
 config.num_learn = 4
 config.win_condition = 230
 config.n_steps = 7000000
