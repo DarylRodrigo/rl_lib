@@ -1,9 +1,11 @@
+from torch.utils.tensorboard import SummaryWriter
 from pprint import pprint
 import wandb
+import time
 import torch
 
 class Config:
-  def __init__(self, env):
+  def __init__(self, env, env_id):
     self.env = env
     self.state_space = env.observation_space.shape[0]
     self.action_space = env.action_space.n
@@ -40,12 +42,16 @@ class Config:
 
     self.wandb = False
     self.save_loc = None
+    
+    # Set up logging for tensor board
+    experiment_name = f"{env_id}____{int(time.time())}"
+    self.tb_logger = SummaryWriter(f"runs/{experiment_name}")
   
   def print_config(self):
     pprint(vars(self))
   
   def init_wandb(self, project="rl-lib", entity="procgen"):
-    wandb.init(project="rl-lib", entity="procgen")
+    wandb.init(project="rl-lib", entity="procgen", sync_tensorboard=True)
 
     wandb.config.update({
       "seed": self.seed,

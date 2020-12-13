@@ -125,7 +125,7 @@ class PPOPixel(PPOBase):
 
     # normalise rewards
     discounted_returns = torch.FloatTensor(discounted_returns).to(self.device)
-    discounted_returns = (discounted_returns - discounted_returns.mean()) / (discounted_returns.std() + 1e-8)
+    # discounted_returns = (discounted_returns - discounted_returns.mean()) / (discounted_returns.std() + 1e-8)
     
     # Fetch collected state, action and log_probs from memory & reshape for nn
     prev_states = torch.stack(self.mem.states).reshape((-1,)+(4, 84, 84)).to(self.device).detach()
@@ -149,7 +149,7 @@ class PPOPixel(PPOBase):
 
       # calculate surrogates
       surrogate_1 = ratio * advantage
-      surrogate_2 = torch.clamp(advantage, 1-self.epsilon, 1+self.epsilon)
+      surrogate_2 = ratio * torch.clamp(ratio, 1-self.epsilon, 1+self.epsilon)
 
       # Calculate losses
       value_loss = F.mse_loss(values, discounted_returns)
@@ -157,6 +157,8 @@ class PPOPixel(PPOBase):
 
       loss = pg_loss + value_loss - self.entropy_beta*entropy
       loss = loss.mean()
+
+      pdb.set_trace()
 
       # calculate gradient
       self.optimiser.zero_grad()
