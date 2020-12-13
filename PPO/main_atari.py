@@ -25,6 +25,7 @@ config.n_episodes = 2000
 config.max_t = 2000
 config.hidden_size = 512
 config.lr_annealing = True
+config.epsilon_annealing = True
 
 config.Memory = Memory
 config.Model = ActorCritic
