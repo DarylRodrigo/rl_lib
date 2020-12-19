@@ -18,27 +18,26 @@ def test_init_memory():
     mem, env = setup()
     assert True
 
-def test_add():
+def test_add_step_to_memory():
     rollout_size = 10
     num_envs = 2
     mem, env = setup(rollout_size, num_envs)
     env.reset()
 
+    # Take Dummy Step
     actions = [env.action_space.sample() for _ in range(num_envs)]
     actions = torch.IntTensor(actions)
-    # actions = torch.Tensor(actions, dtype=torch.int).to("cpu")
-
-    print(actions)
     states, rewards, dones, _ = env.step(actions)
-
-    # rollout_size is 1 because we only do 1 step.
+    
+    # Only 1 because single step taken
     log_probs = torch.rand((1, num_envs))
-
+    
+    # Add to memory
     mem.add(states, actions, rewards, log_probs, dones)
 
     assert torch.equal(mem.states[0], torch.FloatTensor(states))
-    assert torch.equal(mem.actions, actions)
-    assert mem.rewards == torch.FloatTensor(rewards).reshape(-1)
-    assert mem.log_probs == log_probs.reshape(-1)
-    assert mem.dones == torch.BoolTensor(dones).reshape(-1)
+    assert torch.equal(mem.actions[0], actions.type(torch.FloatTensor))
+    assert torch.equal(mem.rewards[0], torch.FloatTensor(rewards).reshape(-1))
+    assert torch.equal(mem.log_probs[0], log_probs.type(torch.FloatTensor).reshape(-1))
+    assert torch.equal(mem.dones[0], torch.FloatTensor(dones).reshape(-1))
     assert mem.idx == 1
