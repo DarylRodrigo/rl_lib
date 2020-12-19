@@ -3,7 +3,7 @@ from pprint import pprint
 import wandb
 import time
 import torch
-from envs import make_env, VecPyTorch
+from .envs import make_env, VecPyTorch
 from stable_baselines3.common.vec_env import DummyVecEnv
 
 
@@ -14,7 +14,7 @@ class Config:
     self.seed = 7456735
     self.num_env = 8
 
-    self.env = VecPyTorch(DummyVecEnv([make_env(env_id, self.seed+i, i) for i in range(8)]), self.device)
+    self.env = VecPyTorch(DummyVecEnv([make_env(env_id, self.seed+i, i) for i in range(self.num_env)]), self.device)
     self.state_space = self.env.observation_space.shape[0]
     self.action_space = self.env.action_space.n
 

@@ -111,6 +111,8 @@ class ImageToPyTorch(gym.ObservationWrapper):
         )
 
     def observation(self, observation):
+        # 80, 80 , 4
+        # 4, 80, 80
         return np.transpose(observation, axes=(2, 0, 1)) / 256
 
 def wrap_pytorch(env):

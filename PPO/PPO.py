@@ -107,7 +107,7 @@ class PPOPixel(PPOBase):
     
     for i in range(num_learn):
       # itterate over mini_batches
-      for mini_batch_idx in self.mem.get_mini_batch_idxs(100):
+      for mini_batch_idx in self.mem.get_mini_batch_idxs(mini_batch_size=100):
 
         # Grab sample from memory
         prev_states, prev_actions, prev_log_probs, discounted_returns = self.mem.sample(mini_batch_idx)
