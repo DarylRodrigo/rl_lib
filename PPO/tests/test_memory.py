@@ -65,3 +65,27 @@ def test_calculating_discounted_returns_single_reward():
     discounted_returns = torch.FloatTensor([dr, dr])
     discounted_returns = torch.transpose(discounted_returns, 1, 0) 
     assert torch.allclose(mem.discounted_returns, discounted_returns)
+
+def test_calculating_discounted_returns_with_done():
+    mem, env = setup(rollout_size=10, num_envs=2)
+
+    # set up rewards & dones
+    r = [0,0,0,0,1,0,0,0,0,0]
+    rewards = torch.FloatTensor([r, r])
+    rewards = torch.transpose(rewards, 1, 0)
+
+    d = [0,1,0,0,0,0,0,0,0,0]
+    dones = torch.FloatTensor([d, d])
+    dones = torch.transpose(dones, 1, 0)
+
+    mem.rewards = rewards
+    mem.dones = dones
+
+    # Calculate returns
+    mem.calculate_discounted_returns([0,0], [0,0])
+
+    # Check discounted returns
+    dr = [0.0000,0.9703,0.9801,0.9900,1.0000,0.0000,0.0000,0.0000,0.0000,0.0000]
+    discounted_returns = torch.FloatTensor([dr, dr])
+    discounted_returns = torch.transpose(discounted_returns, 1, 0) 
+    assert torch.allclose(mem.discounted_returns, discounted_returns)
