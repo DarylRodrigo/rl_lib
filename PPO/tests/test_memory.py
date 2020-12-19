@@ -1,6 +1,9 @@
-# content of test_sample.py
-def func(x):
-    return x + 1
+from ..Memory import Memory
+from ..Config import Config
 
-def test_answer():
-    assert func(3) == 4
+def setup():
+    mem = Memory(50, 2, )
+    return mem
+
+def should_init_memory():
+    assert 3 == 3
