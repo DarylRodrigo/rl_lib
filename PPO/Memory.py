@@ -35,7 +35,6 @@ class Memory:
   def calculate_discounted_returns(self, last_value, next_done):
     # Create empty discounted returns array
     self.discounted_returns = torch.zeros((self.size, self.num_env)).to(self.device)
-
     for t in reversed(range(self.size)):
       # If first loop
       if t == self.size - 1:
