@@ -20,11 +20,6 @@ config.n_steps = 7000000
 config.hidden_size = 512
 
 config.memory = Memory
-config.model = ActorCritic
-config.head_model = functools.partial(cnn_head_model, config)
-config.actor_model = functools.partial(actor_model, config)
-config.critic_model = functools.partial(critic_model, config)
 
-# config.init_wandb()
-
-scores = train_pixel(config)
+mem = config.memory(config.update_every, config.num_env, config.env, config.device)
+print("coo")

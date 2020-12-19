@@ -8,7 +8,7 @@ import numpy as np
 
 class PPOBase:
   def __init__(self, config):
-    self.mem = config.memory()
+    self.mem = config.memory(config.update_every, config.num_env, config.env, config.device)
 
     self.gamma = config.gamma
     self.epsilon = config.epsilon
@@ -93,80 +93,57 @@ class PPOPixel(PPOBase):
     super(PPOPixel, self).__init__(config)
     self.config = config
   
-  def state_shaper(self, state):
-    state = np.array(state).transpose((2, 0, 1))
-    state = torch.FloatTensor(state)
-    state = state.unsqueeze(0)
-    state = state.float() / 256
-
-    return state
   
   def add_to_mem(self, state, action, reward, log_prob, done):
-    state = self.state_shaper(state)
     self.mem.add(state, action, reward, log_prob, done)
   
   def act(self, x):
-    x = self.state_shaper(x).to(self.config.device)
+    x = x.to(self.config.device)
     return self.model_old.act(x)
 
   def learn(self, num_learn, last_value, next_done):
-    # Calculate discounted rewards
-    bootstrap_length = self.config.update_every
-    discounted_returns = torch.zeros(bootstrap_length)
-    for t in reversed(range(bootstrap_length)):
-      # If first loop
-      if t == bootstrap_length - 1:
-        nextnonterminal = 1.0 - next_done
-        next_return = last_value
-      else:
-        nextnonterminal = 1.0 - self.mem.dones[t+1]
-        next_return = discounted_returns[t+1]
-      discounted_returns[t] = self.mem.rewards[t] + self.gamma * nextnonterminal * next_return
-
-    # normalise rewards
-    discounted_returns = torch.FloatTensor(discounted_returns).to(self.device)
+    # Calculate discounted returns using rewards collected from environments
+    self.mem.calculate_discounted_returns(last_value, next_done)
     
-    # Fetch collected state, action and log_probs from memory & reshape for nn
-    prev_states = torch.stack(self.mem.states).reshape((-1,)+(4, 84, 84)).to(self.device).detach()
-    prev_actions = torch.stack(self.mem.actions).reshape(-1).to(self.device).detach()
-    prev_log_probs = torch.stack(self.mem.log_probs).reshape(-1).to(self.device).detach()
-
     for i in range(num_learn):
+      # itterate over mini_batches
+      for mini_batch_idx in self.mem.get_mini_batch_idxs(100):
 
-      # find ratios
-      actions, log_probs, values, entropy = self.model.act(prev_states, prev_actions)
-      ratio = torch.exp(log_probs - prev_log_probs.detach())
-      values = values.squeeze() * 0.5
+        # Grab sample from memory
+        prev_states, prev_actions, prev_log_probs, discounted_returns = self.mem.sample(mini_batch_idx)
 
-      # Stats
-      approx_kl = (prev_log_probs - log_probs).mean()
+        # find ratios
+        actions, log_probs, values, entropy = self.model.act(prev_states, prev_actions)
+        ratio = torch.exp(log_probs - prev_log_probs.detach())
+        values = values.squeeze() * 0.5
 
-      # calculate advantage & normalise
-      advantage = discounted_returns - values
-      advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-8)
+        # Stats
+        approx_kl = (prev_log_probs - log_probs).mean()
 
-      # calculate surrogates
-      surrogate_1 = -advantage * ratio
-      surrogate_2 = -advantage * torch.clamp(ratio, 1-self.epsilon, 1+self.epsilon)
+        # calculate advantage & normalise
+        advantage = discounted_returns - values
+        advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-8)
 
-      # Calculate losses
-      value_loss = F.mse_loss(values, discounted_returns)
-      pg_loss = torch.max(surrogate_1, surrogate_2).mean()
-      entropy_loss = entropy.mean()
+        # calculate surrogates
+        surrogate_1 = -advantage * ratio
+        surrogate_2 = -advantage * torch.clamp(ratio, 1-self.epsilon, 1+self.epsilon)
 
-      loss = pg_loss + value_loss - self.entropy_beta*entropy_loss
-      # pdb.set_trace()
+        # Calculate losses
+        value_loss = F.mse_loss(values, discounted_returns)
+        pg_loss = torch.max(surrogate_1, surrogate_2).mean()
+        entropy_loss = entropy.mean()
 
+        loss = pg_loss + value_loss - self.entropy_beta*entropy_loss
 
-      # calculate gradient
-      self.optimiser.zero_grad()
-      loss.backward()
-      nn.utils.clip_grad_norm_(self.model.parameters(), 0.5)
-      self.optimiser.step()
+        # calculate gradient
+        self.optimiser.zero_grad()
+        loss.backward()
+        nn.utils.clip_grad_norm_(self.model.parameters(), 0.5)
+        self.optimiser.step()
 
-      if torch.abs(approx_kl) > 0.03:
-        break
-    
-    self.model_old.load_state_dict(self.model.state_dict())
+        if torch.abs(approx_kl) > 0.03:
+          break
+      
+      self.model_old.load_state_dict(self.model.state_dict())
 
     return value_loss, pg_loss, approx_kl, entropy_loss

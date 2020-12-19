@@ -39,6 +39,16 @@ import pdb
 
 import numpy as np
 import torch 
+
+class Scale(nn.Module):
+    def __init__(self, scale):
+        super().__init__()
+        self.scale = scale
+
+    def forward(self, x):
+        return x * self.scale
+
+
 def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
     torch.nn.init.orthogonal_(layer.weight, std)
     torch.nn.init.constant_(layer.bias, bias_const)
@@ -48,6 +58,7 @@ class ActorCritic(nn.Module):
     def __init__(self, config):
         super(ActorCritic, self).__init__()
         self.network = nn.Sequential(
+            Scale(1/255),
             layer_init(nn.Conv2d(4, 32, 8, stride=4)),
             nn.ReLU(),
             layer_init(nn.Conv2d(32, 64, 4, stride=2)),

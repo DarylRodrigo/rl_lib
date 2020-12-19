@@ -3,18 +3,22 @@ from pprint import pprint
 import wandb
 import time
 import torch
+from envs import make_env, VecPyTorch
+from stable_baselines3.common.vec_env import DummyVecEnv
+
 
 class Config:
-  def __init__(self, env, env_id):
-    self.env = env
-    self.state_space = env.observation_space.shape[0]
-    self.action_space = env.action_space.n
-
-    self.win_condition = None
-
+  def __init__(self, env_id):
     self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Running experiment with device: {}".format(self.device))
     self.seed = 7456735
+    self.num_env = 8
+
+    self.env = VecPyTorch(DummyVecEnv([make_env(env_id, self.seed+i, i) for i in range(8)]), self.device)
+    self.state_space = self.env.observation_space.shape[0]
+    self.action_space = self.env.action_space.n
+
+    self.win_condition = None
 
     self.n_steps = 7000000
     self.n_episodes = 2000
