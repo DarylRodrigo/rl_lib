@@ -3,19 +3,19 @@ import numpy as np
 import pdb
 
 class Memory:
-  def __init__(self, size, num_env, env, device, gamma=0.99):
+  def __init__(self, size, num_envs, env, device, gamma=0.99):
     self.gamma = gamma
     self.size = size
     self.device = device
-    self.num_env = num_env
-    self.observation_space = env.observation_space.shape 
-    self.action_space = env.action_space.shape 
+    self.num_envs = num_envs
+    self.observation_shape = env.observation_space.shape 
+    self.action_shape = env.action_space.shape 
 
-    self.states = torch.zeros((size, num_env) + env.observation_space.shape).to(device)
-    self.actions = torch.zeros((size, num_env) + env.action_space.shape).to(device)
-    self.rewards = torch.zeros((size, num_env)).to(device)
-    self.log_probs = torch.zeros((size, num_env)).to(device)
-    self.dones = torch.zeros((size, num_env)).to(device)
+    self.states = torch.zeros((size, num_envs) + env.observation_space.shape).to(device)
+    self.actions = torch.zeros((size, num_envs) + env.action_space.shape).to(device)
+    self.rewards = torch.zeros((size, num_envs)).to(device)
+    self.log_probs = torch.zeros((size, num_envs)).to(device)
+    self.dones = torch.zeros((size, num_envs)).to(device)
 
     self.idx = 0
     self.discounted_returns = None
@@ -34,7 +34,7 @@ class Memory:
   
   def calculate_discounted_returns(self, last_value, next_done):
     # Create empty discounted returns array
-    self.discounted_returns = torch.zeros((self.size, self.num_env)).to(self.device)
+    self.discounted_returns = torch.zeros((self.size, self.num_envs)).to(self.device)
     for t in reversed(range(self.size)):
       # If first loop
       if t == self.size - 1:
@@ -51,8 +51,8 @@ class Memory:
       
     # flatten into one array
     discounted_returns = self.discounted_returns.reshape(-1)
-    states = self.states.reshape((-1,)+self.observation_space.shape)
-    actions = self.actions.reshape((-1,)+self.action_space.shape)
+    states = self.states.reshape((-1,)+self.observation_shape)
+    actions = self.actions.reshape((-1,)+self.action_shape)
     log_probs = self.log_probs.reshape(-1)
 
     # return sample
@@ -64,14 +64,16 @@ class Memory:
   def reset(self):
     self.idx = 0
 
-    self.states = torch.zeros((size, num_env) + env.observation_space.shape).to(device)
-    self.actions = torch.zeros((size, num_env) + env.action_space.shape).to(device)
-    self.rewards = torch.zeros((size, num_env)).to(device)
-    self.log_probs = torch.zeros((size, num_env)).to(device)
-    self.dones = torch.zeros((size, num_env)).to(device)
+    self.states = torch.zeros((size, num_envs) + env.observation_space.shape).to(device)
+    self.actions = torch.zeros((size, num_envs) + env.action_space.shape).to(device)
+    self.rewards = torch.zeros((size, num_envs)).to(device)
+    self.log_probs = torch.zeros((size, num_envs)).to(device)
+    self.dones = torch.zeros((size, num_envs)).to(device)
   
   def get_mini_batch_idxs(self, mini_batch_size):
+    # create array the size of all our data set and shuffle so indexs are at random positions
     idxs = np.arange(self.size*self.num_envs)
     np.random.shuffle(idxs)
 
+    # create minibatches out of them of "mini_batch" size
     return [ idxs[start:start+mini_batch_size] for start in np.arange(0, self.size*self.num_envs, mini_batch_size)]
