@@ -91,8 +91,6 @@ def train_pixel(config):
 
       # Add to memory buffer
       agent.add_to_mem(states, actions, rewards, log_probs, dones)
-
-      pdb.set_trace()
       # Update state
       states = next_states
 

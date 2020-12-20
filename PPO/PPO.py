@@ -113,8 +113,10 @@ class PPOPixel(PPOBase):
         prev_states, prev_actions, prev_log_probs, discounted_returns = self.mem.sample(mini_batch_idx)
 
         # find ratios
-        actions, log_probs, values, entropy = self.model.act(prev_states, prev_actions)
+        actions, log_probs, _, entropy = self.model.act(prev_states, prev_actions)
         ratio = torch.exp(log_probs - prev_log_probs.detach())
+        
+        values = self.model.get_values(prev_states)
         values = values.squeeze() * 0.5
 
         # Stats
@@ -135,6 +137,7 @@ class PPOPixel(PPOBase):
         entropy_loss = entropy.mean()
 
         loss = pg_loss + value_loss - self.entropy_beta*entropy_loss
+        pdb.set_trace()
 
         # calculate gradient
         self.optimiser.zero_grad()

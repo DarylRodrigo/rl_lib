@@ -167,6 +167,8 @@ def test_getting_mini_batch_eql_number():
   mem, env = setup(rollout_size=100, num_envs=2)
   mini_batch_idxs = mem.get_mini_batch_idxs(10)
 
+  assert len(mini_batch_idxs) == 20
+
 def test_getting_mini_batch_eql_number():
   mem, env = setup(rollout_size=100, num_envs=2)
   mini_batch_idxs = mem.get_mini_batch_idxs(9)
