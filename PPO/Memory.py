@@ -33,17 +33,18 @@ class Memory:
     self.idx += 1
   
   def calculate_discounted_returns(self, last_value, next_done):
-    # Create empty discounted returns array
-    self.discounted_returns = torch.zeros((self.size, self.num_envs)).to(self.device)
-    for t in reversed(range(self.size)):
-      # If first loop
-      if t == self.size - 1:
-        nextnonterminal = 1.0 - torch.FloatTensor(next_done).reshape(-1).to(self.device)
-        next_return = torch.FloatTensor(last_value).reshape(-1).to(self.device)
-      else:
-        nextnonterminal = 1.0 - self.dones[t+1]
-        next_return = self.discounted_returns[t+1]
-      self.discounted_returns[t] = self.rewards[t] + self.gamma * nextnonterminal * next_return
+    with torch.no_grad():
+      # Create empty discounted returns array
+      self.discounted_returns = torch.zeros((self.size, self.num_envs)).to(self.device)
+      for t in reversed(range(self.size)):
+        # If first loop
+        if t == self.size - 1:
+          nextnonterminal = 1.0 - torch.FloatTensor(next_done).reshape(-1).to(self.device)
+          next_return = torch.FloatTensor(last_value).reshape(-1).to(self.device)
+        else:
+          nextnonterminal = 1.0 - self.dones[t+1]
+          next_return = self.discounted_returns[t+1]
+        self.discounted_returns[t] = self.rewards[t] + self.gamma * nextnonterminal * next_return
 
   def sample(self, mini_batch_idx):
     if self.discounted_returns is None:
@@ -55,7 +56,7 @@ class Memory:
     actions = self.actions.reshape((-1,)+self.action_shape)
     log_probs = self.log_probs.reshape(-1)
 
-    # return sample
+    # return samples
     return states[mini_batch_idx], actions[mini_batch_idx], log_probs[mini_batch_idx], discounted_returns[mini_batch_idx]
   
   def isFull(self):
@@ -64,11 +65,11 @@ class Memory:
   def reset(self):
     self.idx = 0
 
-    self.states = torch.zeros((size, num_envs) + env.observation_space.shape).to(device)
-    self.actions = torch.zeros((size, num_envs) + env.action_space.shape).to(device)
-    self.rewards = torch.zeros((size, num_envs)).to(device)
-    self.log_probs = torch.zeros((size, num_envs)).to(device)
-    self.dones = torch.zeros((size, num_envs)).to(device)
+    self.states = torch.zeros((self.size, self.num_envs) + self.observation_shape).to(self.device)
+    self.actions = torch.zeros((self.size, self.num_envs) + self.action_shape).to(self.device)
+    self.rewards = torch.zeros((self.size, self.num_envs)).to(self.device)
+    self.log_probs = torch.zeros((self.size, self.num_envs)).to(self.device)
+    self.dones = torch.zeros((self.size, self.num_envs)).to(self.device)
   
   def get_mini_batch_idxs(self, mini_batch_size):
     # create array the size of all our data set and shuffle so indexs are at random positions

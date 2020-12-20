@@ -78,8 +78,8 @@ def train_pixel(config):
     score = 0
     values, dones = None, None
     
-    for t in range(config.update_every):
-      global_step += 1
+    while agent.mem.isFull() == False:
+      global_step += config.num_env
 
       # Take actions
       actions, log_probs, values, entrs = agent.act(states)
@@ -88,7 +88,7 @@ def train_pixel(config):
       # Add to memory buffer
       agent.add_to_mem(states, actions, rewards, log_probs, dones)
 
-      # Update 
+      # Update state
       states = next_states
       
       # Book Keeping

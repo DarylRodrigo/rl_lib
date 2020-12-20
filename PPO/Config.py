@@ -3,7 +3,7 @@ from pprint import pprint
 import wandb
 import time
 import torch
-from .envs import make_env, VecPyTorch
+from envs import make_env, VecPyTorch
 from stable_baselines3.common.vec_env import DummyVecEnv
 
 
@@ -23,7 +23,7 @@ class Config:
     self.n_steps = 7000000
     self.n_episodes = 2000
     self.max_t = 100
-    self.update_every = 2000
+    self.update_every = 100
 
     # TODO set as decaying and pass into learn from PPO
     self.epsilon = 0.1
