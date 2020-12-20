@@ -23,11 +23,12 @@ class Memory:
   def add(self, states, actions, rewards, log_probs, dones):
     if (self.idx > self.size - 1):
       raise Exception("Memory out of space") 
-
+    
+    # pdb.set_trace()
     self.states[self.idx] = states
     self.actions[self.idx] = actions
     self.rewards[self.idx] = torch.FloatTensor(rewards.reshape(-1)).to(self.device)
-    self.log_probs[self.idx] = torch.FloatTensor(log_probs.reshape(-1)).to(self.device)
+    self.log_probs[self.idx] = log_probs.reshape(-1).to(self.device)
     self.dones[self.idx] = torch.FloatTensor(dones.reshape(-1)).to(self.device)
 
     self.idx += 1
@@ -40,7 +41,7 @@ class Memory:
         # If first loop
         if t == self.size - 1:
           nextnonterminal = 1.0 - torch.FloatTensor(next_done).reshape(-1).to(self.device)
-          next_return = torch.FloatTensor(last_value).reshape(-1).to(self.device)
+          next_return = last_value.reshape(-1).to(self.device)
         else:
           nextnonterminal = 1.0 - self.dones[t+1]
           next_return = self.discounted_returns[t+1]

@@ -1,0 +1,24 @@
+{
+    "os": "Linux-5.4.0-58-generic-x86_64-with-glibc2.29",
+    "python": "3.8.5",
+    "heartbeatAt": "2020-12-20T09:54:25.528430",
+    "startedAt": "2020-12-20T09:54:24.714670",
+    "docker": null,
+    "gpu": "GeForce RTX 2060",
+    "gpu_count": 1,
+    "cpu_count": 16,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "codePath": "PPO/main_atari.py",
+    "program": "main_atari.py",
+    "git": {
+        "remote": "git@github.com:DarylRodrigo/rl_lib.git",
+        "commit": "60a605a8effa6dfc071ff9621b65349b2a5b382f"
+    },
+    "email": "darylrodrigo@gmail.com",
+    "root": "/home/daryl/Documents/projects/rl_lib",
+    "host": "RadioactiveSquirr3l",
+    "username": "daryl",
+    "executable": "/usr/bin/python3"
+}
