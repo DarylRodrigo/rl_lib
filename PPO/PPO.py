@@ -127,15 +127,16 @@ class PPOPixel(PPOBase):
         advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-8)
 
         # calculate surrogates
-        surrogate_1 = -advantage * ratio
-        surrogate_2 = -advantage * torch.clamp(ratio, 1-self.epsilon, 1+self.epsilon)
+        surrogate_1 = advantage * ratio
+        surrogate_2 = advantage * torch.clamp(ratio, 1-self.epsilon, 1+self.epsilon)
 
         # Calculate losses
         value_loss = F.mse_loss(values, discounted_returns)
-        pg_loss = torch.max(surrogate_1, surrogate_2).mean()
+        pg_loss = -torch.min(surrogate_1, surrogate_2).mean()
         entropy_loss = entropy.mean()
 
         loss = pg_loss + value_loss - self.entropy_beta*entropy_loss
+        pdb.set_trace()
 
         # calculate gradient
         self.optimiser.zero_grad()
