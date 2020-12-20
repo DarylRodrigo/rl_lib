@@ -7,7 +7,7 @@ import numpy as np
 
 class PPOBase:
   def __init__(self, config):
-    self.mem = config.Memory()
+    self.mem = config.memory()
 
     self.lr = config.lr
     self.total_global_steps = config.total_global_steps
@@ -18,8 +18,8 @@ class PPOBase:
     self.entropy_beta = config.entropy_beta
     self.device = config.device
 
-    self.model = config.Model(config).to(self.device)
-    self.model_old = config.Model(config).to(self.device)
+    self.model = config.model(config).to(self.device)
+    self.model_old = config.model(config).to(self.device)
 
     self.model_old.load_state_dict(self.model.state_dict())
 
@@ -152,6 +152,7 @@ class PPOPixel(PPOBase):
 
       # Stats
       approx_kl = (prev_log_probs - log_probs).mean()
+      approx_entropy = entropy.mean()
 
       # calculate advantage & normalise
       advantage = discounted_returns - values
@@ -185,4 +186,4 @@ class PPOPixel(PPOBase):
         self.model.load_state_dict(self.model_old.state_dict())
         break
 
-    return value_loss, pg_loss, approx_kl
+    return value_loss, pg_loss, approx_kl, approx_entropy

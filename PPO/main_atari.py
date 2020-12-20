@@ -17,21 +17,21 @@ env = wrap_deepmind(env, episode_life=True, clip_rewards=True, frame_stack=True,
 
 config = Config(env)
 
-config.total_global_steps = 10e6
 config.update_every = 2000
 config.num_learn = 4
 config.win_condition = 230
-config.n_episodes = 2000
-config.max_t = 2000
+config.n_steps = 7e5
 config.hidden_size = 512
 config.lr_annealing = True
 config.epsilon_annealing = True
 
-config.Memory = Memory
-config.Model = ActorCritic
+config.memory = Memory
+config.model = ActorCritic
 config.head_model = functools.partial(cnn_head_model, config)
 config.actor_model = functools.partial(actor_model, config)
 config.critic_model = functools.partial(critic_model, config)
+
+config.init_wandb()
 
 experiment_name = f"{env_id}____{int(time.time())}"
 config.tb_logger = SummaryWriter(f"runs/{experiment_name}")
