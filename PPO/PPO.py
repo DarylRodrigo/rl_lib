@@ -10,7 +10,7 @@ class PPOBase:
     self.mem = config.memory()
 
     self.lr = config.lr
-    self.total_global_steps = config.total_global_steps
+    self.n_steps = config.n_steps
     self.lr_annealing = config.lr_annealing
     self.epsilon_annealing = config.epsilon_annealing
     self.gamma = config.gamma
@@ -113,7 +113,7 @@ class PPOPixel(PPOBase):
 
   def learn(self, num_learn, last_value, next_done, global_step):
     # For reference: This is similar to how baselines and Costa are doing it.
-    frac = 1.0 - (global_step - 1.0) / self.total_global_steps
+    frac = 1.0 - (global_step - 1.0) / self.n_steps
     if self.lr_annealing:
       self.optimiser.param_groups[0]['lr'] = self.lr * frac
     epsilon_now = self.epsilon

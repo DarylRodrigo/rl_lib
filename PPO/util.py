@@ -109,7 +109,7 @@ def train_pixel(config):
         state = env.reset()
 
     # update and learn
-    value_loss, pg_loss, approx_kl, approx_entropy = agent.learn(config.num_learn, value.item(), done)
+    value_loss, pg_loss, approx_kl, approx_entropy = agent.learn(config.num_learn, value.item(), done, global_step)
 
     agent.mem.clear()
     steps = 0
