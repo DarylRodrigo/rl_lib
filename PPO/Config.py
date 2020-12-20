@@ -5,7 +5,8 @@ import time
 import torch
 from envs import make_env, VecPyTorch
 from stable_baselines3.common.vec_env import DummyVecEnv
-
+import random
+import numpy as np
 
 class Config:
   def __init__(self, env_id):
@@ -51,7 +52,14 @@ class Config:
     # Set up logging for tensor board
     experiment_name = f"{env_id}____{int(time.time())}"
     self.tb_logger = SummaryWriter(f"runs/{experiment_name}")
+
+    self.init_seed()
   
+  def init_seed(self):
+    random.seed(self.seed)
+    np.random.seed(self.seed)
+    torch.manual_seed(self.seed)
+
   def print_config(self):
     pprint(vars(self))
   
