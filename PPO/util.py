@@ -48,13 +48,12 @@ def train(config):
     scores_deque.append(score)
     scores.append(score)
     average_scores.append(np.mean(scores_deque))
-    
-      
+
     if i_episode % 10 == 0:
       print("\rEpisode {}	Average Score: {:.2f}	Score: {:.2f}".format(i_episode, np.mean(scores_deque), score), end="")
     if i_episode % 100 == 0:
       print("\rEpisode {}	Average Score: {:.2f}".format(i_episode, np.mean(scores_deque)))   
-    
+
     if np.mean(scores_deque) > config.win_condition:
       print("\nEnvironment Solved!")
       break
@@ -76,6 +75,7 @@ def train_pixel(config):
     wandb.watch(agent.model)
 
   while global_step < config.n_steps:
+
     state = env.reset()
     score = 0
     value, done = None, None
@@ -109,7 +109,8 @@ def train_pixel(config):
         state = env.reset()
 
     # update and learn
-    value_loss, pg_loss, approx_kl, approx_entropy = agent.learn(config.num_learn, value.item(), done)
+    value_loss, pg_loss, approx_kl, approx_entropy = agent.learn(config.num_learn, value.item(), done, global_step)
+
     agent.mem.clear()
     steps = 0
 
@@ -130,8 +131,5 @@ def train_pixel(config):
 
 
     print("Global Step: {}	Average Score: {:.2f}".format(global_step, np.mean(scores_deque)))   
-      
 
   return scores, average_scores
-
-

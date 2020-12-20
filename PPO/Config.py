@@ -33,6 +33,7 @@ class Config:
     self.batch_size = 64
     self.buffer_size = int(1e5)
     self.lr_annealing = False
+    self.epsilon_annealing = False
     self.learn_every = 4
     self.entropy_beta = 0.01
 
