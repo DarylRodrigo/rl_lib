@@ -12,7 +12,7 @@ class Config:
   def __init__(self, env_id):
     self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Running experiment with device: {}".format(self.device))
-    self.seed = 7456735
+    self.seed = 1
     self.num_env = 8
 
     self.env_id = env_id

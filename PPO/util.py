@@ -88,7 +88,6 @@ def train_pixel(config):
       with torch.no_grad():
         actions, log_probs, _, entrs = agent.act(states)
         values = agent.model.get_values(states)
-        print(values.reshape(-1))
       next_states, rewards, dones, infos = envs.step(actions)
 
       # Add to memory buffer
