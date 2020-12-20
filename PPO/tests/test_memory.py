@@ -3,12 +3,13 @@ from ..Memory import Memory
 from ..envs import make_env, VecPyTorch
 from stable_baselines3.common.vec_env import DummyVecEnv
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 def setup(rollout_size=100, num_envs=2):
   # Config
   env_id = "BreakoutNoFrameskip-v4"
   seed = 1234
-  device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
+  
   # Create mem
   env = VecPyTorch(DummyVecEnv([make_env(env_id, seed+i, i) for i in range(num_envs)]), device)
   mem = Memory(rollout_size, num_envs, env, device)
@@ -58,7 +59,8 @@ def test_calculating_discounted_returns_single_reward():
   mem.dones = dones
 
   # Calculate returns
-  mem.calculate_discounted_returns([0,0], [0,0])
+  last_value = torch.FloatTensor([0.0,0.0]).to(device)
+  mem.calculate_discounted_returns(last_value, [0,0])
 
   # Check discounted returns
   dr = [0.9606,0.9703,0.9801,0.9900,1.0000,0.0000,0.0000,0.0000,0.0000,0.0000]
@@ -82,7 +84,8 @@ def test_calculating_discounted_returns_with_done():
   mem.dones = dones
 
   # Calculate returns
-  mem.calculate_discounted_returns([0,0], [0,0])
+  last_value = torch.FloatTensor([0.0,0.0]).to(device)
+  mem.calculate_discounted_returns(last_value, [0,0])
 
   # Check discounted returns
   dr = [0.0000,0.9703,0.9801,0.9900,1.0000,0.0000,0.0000,0.0000,0.0000,0.0000]
@@ -106,7 +109,8 @@ def test_calculating_discounted_returns_with_done_and_last_value():
   mem.dones = dones
 
   # Calculate returns
-  mem.calculate_discounted_returns([0.5,0.5], [0,0])
+  last_value = torch.FloatTensor([0.5,0.5]).to(device)
+  mem.calculate_discounted_returns(last_value, [0,0])
 
   # Check discounted returns
   dr = [0.000000,1.427058,1.441472,1.456033,1.470740,0.475495,0.480298,0.485150,0.490050,0.495000]
@@ -132,7 +136,8 @@ def test_calculating_discounted_returns_with_done_and_neg_last_value():
   mem.dones = dones
 
   # Calculate returns
-  mem.calculate_discounted_returns([-0.5,-0.5], [0,0])
+  last_value = torch.FloatTensor([-0.5,-0.5]).to(device)
+  mem.calculate_discounted_returns(last_value, [0,0])
 
   # Check discounted returns
   dr = [0.00000000,0.51354039,0.51872766,0.52396733,0.52925992,-0.47549507,-0.48029804,-0.48514953,-0.49005002,-0.49500000]
@@ -151,7 +156,8 @@ def test_sample_memory():
   mem.log_probs = torch.FloatTensor([[1, 2], [3, 4], [5, 6]])
   mem.dones = torch.FloatTensor([[0, 0], [0, 0], [0, 0]])
   
-  mem.calculate_discounted_returns([0,0], [0,0])
+  last_value = torch.FloatTensor([0.0,0.0]).to(device)
+  mem.calculate_discounted_returns(last_value, [0,0])
   s, a, lp, dr = mem.sample([0,2,4])
   
   assert torch.equal(lp, torch.FloatTensor([1,3,5]))
