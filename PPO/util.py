@@ -65,7 +65,7 @@ def train(config):
 
 def train_pixel(config):
   # env = config.env
-  envs = VecPyTorch(DummyVecEnv([make_env(config.env_id, 234+i, i) for i in range(config.num_env)]), config.device)
+  envs = VecPyTorch(DummyVecEnv([make_env(config.env_id, config.seed+i, i) for i in range(config.num_env)]), config.device)
   scores_deque = deque(maxlen=100)
   scores = []
   average_scores = []
