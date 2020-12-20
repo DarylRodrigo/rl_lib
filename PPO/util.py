@@ -7,6 +7,8 @@ from PPO import PPOClassical, PPOPixel
 from Config import Config
 import pdb
 import wandb
+from envs import make_env, VecPyTorch
+from stable_baselines3.common.vec_env import DummyVecEnv
 
 def train(config):
   env = copy.deepcopy(config.env)
@@ -62,7 +64,8 @@ def train(config):
   return scores, average_scores
 
 def train_pixel(config):
-  env = config.env
+  # env = config.env
+  envs = VecPyTorch(DummyVecEnv([make_env(config.env_id, 234+i, i) for i in range(config.num_env)]), config.device)
   scores_deque = deque(maxlen=100)
   scores = []
   average_scores = []
@@ -74,7 +77,7 @@ def train_pixel(config):
     wandb.watch(agent.model)
 
   while global_step < config.n_steps:
-    states = env.reset()
+    states = envs.reset()
     score = 0
     values, dones = None, None
     
@@ -82,14 +85,17 @@ def train_pixel(config):
       global_step += config.num_env
 
       # Take actions
-      actions, log_probs, values, entrs = agent.act(states)
-      next_states, rewards, dones, infos = env.step(actions)
+      with torch.no_grad():
+        actions, log_probs, values, entrs = agent.act(states)
+      next_states, rewards, dones, infos = envs.step(actions)
 
       # Add to memory buffer
       agent.add_to_mem(states, actions, rewards, log_probs, dones)
 
+      pdb.set_trace()
       # Update state
       states = next_states
+
       
       # Book Keeping
       for info in infos:

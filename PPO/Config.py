@@ -14,6 +14,7 @@ class Config:
     self.seed = 7456735
     self.num_env = 8
 
+    self.env_id = env_id
     self.env = VecPyTorch(DummyVecEnv([make_env(env_id, self.seed+i, i) for i in range(self.num_env)]), self.device)
     self.state_space = self.env.observation_space.shape[0]
     self.action_space = self.env.action_space.n

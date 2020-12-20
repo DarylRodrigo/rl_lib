@@ -121,6 +121,7 @@ class PPOPixel(PPOBase):
         approx_kl = (prev_log_probs - log_probs).mean()
 
         # calculate advantage & normalise
+        pdb.set_trace()
         advantage = discounted_returns - values
         advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-8)
 

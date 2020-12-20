@@ -29,7 +29,7 @@ def test_add_step_to_memory():
   actions = [env.action_space.sample() for _ in range(num_envs)]
   actions = torch.IntTensor(actions)
   states, rewards, dones, _ = env.step(actions)
-  
+
   # Only 1 because single step taken
   log_probs = torch.rand((1, num_envs))
   
