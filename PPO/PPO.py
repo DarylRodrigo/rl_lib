@@ -137,7 +137,6 @@ class PPOPixel(PPOBase):
         entropy_loss = entropy.mean()
 
         loss = pg_loss + value_loss - self.entropy_beta*entropy_loss
-        pdb.set_trace()
 
         # calculate gradient
         self.optimiser.zero_grad()
