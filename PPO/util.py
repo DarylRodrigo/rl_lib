@@ -50,13 +50,12 @@ def train(config):
     scores_deque.append(score)
     scores.append(score)
     average_scores.append(np.mean(scores_deque))
-    
-      
+
     if i_episode % 10 == 0:
       print("\rEpisode {}	Average Score: {:.2f}	Score: {:.2f}".format(i_episode, np.mean(scores_deque), score), end="")
     if i_episode % 100 == 0:
       print("\rEpisode {}	Average Score: {:.2f}".format(i_episode, np.mean(scores_deque)))   
-    
+
     if np.mean(scores_deque) > config.win_condition:
       print("\nEnvironment Solved!")
       break
@@ -112,7 +111,7 @@ def train_pixel(config):
           average_scores.append(np.mean(scores_deque))
 
     # update and learn
-    value_loss, pg_loss, approx_kl, approx_entropy = agent.learn(config.num_learn, values, dones)
+    value_loss, pg_loss, approx_kl, approx_entropy, lr_now = agent.learn(config.num_learn, values, dones, global_step)
     agent.mem.reset()
 
     # Book Keeping
@@ -127,12 +126,10 @@ def train_pixel(config):
         "policy_loss": pg_loss,
         "approx_kl": approx_kl,
         "approx_entropy": approx_entropy,
-        "global_step": global_step
+        "global_step": global_step,
+        "learning_rate": lr_now
        })
 
     print("Global Step: {}	Average Score: {:.2f}".format(global_step, np.mean(scores_deque)))   
-      
 
   return scores, average_scores
-
-

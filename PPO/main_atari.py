@@ -16,9 +16,11 @@ config = Config(env_id)
 config.update_every = 128
 config.num_learn = 4
 config.win_condition = 230
-config.n_steps = 7000000
+config.n_steps = 7e5
 config.hidden_size = 512
 config.lr = 2.5e-4
+config.lr_annealing = True
+config.epsilon_annealing = True
 
 config.memory = Memory
 config.model = ActorCritic

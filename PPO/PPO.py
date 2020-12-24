@@ -2,7 +2,6 @@ import torch
 import torch.optim as optim
 import torch.nn.functional as F
 import torch.nn as nn
-import copy
 import pdb
 import numpy as np
 
@@ -10,6 +9,10 @@ class PPOBase:
   def __init__(self, config):
     self.mem = config.memory(config.update_every, config.num_env, config.env, config.device)
 
+    self.lr = config.lr
+    self.n_steps = config.n_steps
+    self.lr_annealing = config.lr_annealing
+    self.epsilon_annealing = config.epsilon_annealing
     self.gamma = config.gamma
     self.epsilon = config.epsilon
     self.entropy_beta = config.entropy_beta
@@ -20,11 +23,11 @@ class PPOBase:
 
     self.model_old.load_state_dict(self.model.state_dict())
 
-    self.optimiser = optim.Adam(self.model.parameters(), lr=config.lr, eps=1e-5)
-  
+    self.optimiser = optim.Adam(self.model.parameters(), lr=self.lr)
+
   def act(self, x):
     raise NotImplemented
-  
+
   def add_to_mem(self, state, action, reward, log_prob, done):
     raise NotImplemented
 
@@ -34,11 +37,11 @@ class PPOBase:
 class PPOClassical(PPOBase):
   def __init__(self, config):
     super(PPOClassical, self).__init__(config)
-  
+
   def act(self, x):
     x = torch.FloatTensor(x)
     return self.model_old.act(x)
-  
+
   def add_to_mem(self, state, action, reward, log_prob, done):
     state = torch.FloatTensor(state)
     self.mem.add(state, action, reward, log_prob, done)
@@ -64,7 +67,6 @@ class PPOClassical(PPOBase):
     prev_log_probs = torch.stack(self.mem.log_probs).to(self.device).detach()
 
     for i in range(num_learn):
-
       # find ratios
       actions, log_probs, values, entropy = self.model.act(prev_states, prev_actions)
       ratio = torch.exp(log_probs - prev_log_probs.detach())
@@ -85,7 +87,7 @@ class PPOClassical(PPOBase):
       self.optimiser.zero_grad()
       loss.backward()
       self.optimiser.step()
-    
+
     self.model_old.load_state_dict(self.model.state_dict())
 
 class PPOPixel(PPOBase):
@@ -93,15 +95,24 @@ class PPOPixel(PPOBase):
     super(PPOPixel, self).__init__(config)
     self.config = config
   
-  
   def add_to_mem(self, state, action, reward, log_prob, done):
     self.mem.add(state, action, reward, log_prob, done)
-  
+
   def act(self, x):
     x = x.to(self.config.device)
     return self.model_old.act(x)
 
-  def learn(self, num_learn, last_value, next_done):
+  def learn(self, num_learn, last_value, next_done, global_step):
+    # Learning Rate Annealing
+    frac = 1.0 - (global_step - 1.0) / self.n_steps
+    lr_now = self.lr * frac
+    if self.lr_annealing:
+      self.optimiser.param_groups[0]['lr'] = lr_now
+    # Epsilon Annealing
+    epsilon_now = self.epsilon
+    if self.epsilon_annealing:
+      epsilon_now = self.epsilon * frac
+
     # Calculate discounted returns using rewards collected from environments
     self.mem.calculate_discounted_returns(last_value, next_done)
     
@@ -109,7 +120,7 @@ class PPOPixel(PPOBase):
       # itterate over mini_batches
       for mini_batch_idx in self.mem.get_mini_batch_idxs(mini_batch_size=100):
 
-        # Grab sample from memory
+                # Grab sample from memory
         prev_states, prev_actions, prev_log_probs, discounted_returns = self.mem.sample(mini_batch_idx)
 
         # find ratios
@@ -146,7 +157,13 @@ class PPOPixel(PPOBase):
 
         if torch.abs(approx_kl) > 0.03:
           break
-      
-      self.model_old.load_state_dict(self.model.state_dict())
 
-    return value_loss, pg_loss, approx_kl, entropy_loss
+        _, new_log_probs, _, _ = self.model.act(prev_states, prev_actions)
+        if (prev_log_probs - new_log_probs).mean() > 0.03:
+          self.model.load_state_dict(self.model_old.state_dict())
+          break
+    
+    # TODO: Check if this is in the right place
+    self.model_old.load_state_dict(self.model.state_dict())
+
+    return value_loss, pg_loss, approx_kl, entropy_loss, lr_now
