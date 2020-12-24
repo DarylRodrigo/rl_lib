@@ -143,7 +143,15 @@ class PPOPixel(PPOBase):
         new_values = self.model.get_values(prev_states).view(-1)
 
         # Calculate losses
-        value_loss =  (discounted_returns - values).pow(2).mean()
+        new_values = self.model.get_values(prev_states).view(-1)
+
+        value_loss_unclipped = (new_values - discounted_returns)**2
+
+        values_clipped = values + torch.clamp(new_values - values, -epsilon_now, epsilon_now)
+        value_loss_clipped = (values_clipped - discounted_returns)**2
+
+        value_loss = 0.5 * torch.mean(torch.max(value_loss_clipped, value_loss_unclipped))
+
         pg_loss = -torch.min(surrogate_1, surrogate_2).mean()
         entropy_loss = entropy.mean()
 
