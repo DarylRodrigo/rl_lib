@@ -1,23 +1,31 @@
+from torch.utils.tensorboard import SummaryWriter
 from pprint import pprint
 import wandb
+import time
 import torch
+from envs import make_env, VecPyTorch
+from stable_baselines3.common.vec_env import DummyVecEnv
+import random
+import numpy as np
 
 class Config:
-  def __init__(self, env):
-    self.env = env
-    self.state_space = env.observation_space.shape[0]
-    self.action_space = env.action_space.n
-
-    self.win_condition = None
-
+  def __init__(self, env_id):
     self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Running experiment with device: {}".format(self.device))
-    self.seed = 7456735
+    self.seed = 1
+    self.num_env = 8
+
+    self.env_id = env_id
+    self.env = VecPyTorch(DummyVecEnv([make_env(env_id, self.seed+i, i) for i in range(self.num_env)]), self.device)
+    self.state_space = self.env.observation_space.shape[0]
+    self.action_space = self.env.action_space.n
+
+    self.win_condition = None
 
     self.n_steps = 7000000
     self.n_episodes = 2000
     self.max_t = 100
-    self.update_every = 2000
+    self.update_every = 100
 
     # TODO set as decaying and pass into learn from PPO
     self.epsilon = 0.1
@@ -41,12 +49,23 @@ class Config:
 
     self.wandb = False
     self.save_loc = None
+    
+    # Set up logging for tensor board
+    experiment_name = f"{env_id}____{int(time.time())}"
+    self.tb_logger = SummaryWriter(f"runs/{experiment_name}")
+
+    self.init_seed()
   
+  def init_seed(self):
+    random.seed(self.seed)
+    np.random.seed(self.seed)
+    torch.manual_seed(self.seed)
+
   def print_config(self):
     pprint(vars(self))
   
   def init_wandb(self, project="rl-lib", entity="procgen"):
-    wandb.init(project="rl-lib", entity="procgen")
+    wandb.init(project="rl-lib", entity="procgen", sync_tensorboard=True)
 
     wandb.config.update({
       "seed": self.seed,

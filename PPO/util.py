@@ -7,6 +7,8 @@ from PPO import PPOClassical, PPOPixel
 from Config import Config
 import pdb
 import wandb
+from envs import make_env, VecPyTorch
+from stable_baselines3.common.vec_env import DummyVecEnv
 
 def train(config):
   env = copy.deepcopy(config.env)
@@ -61,12 +63,11 @@ def train(config):
   return scores, average_scores
 
 def train_pixel(config):
-  env = copy.deepcopy(config.env)
-  steps = 0
+  # env = config.env
+  envs = VecPyTorch(DummyVecEnv([make_env(config.env_id, config.seed+i, i) for i in range(config.num_env)]), config.device)
   scores_deque = deque(maxlen=100)
   scores = []
   average_scores = []
-  max_score = -np.Inf
   global_step = 0
 
   agent = PPOPixel(config)
@@ -75,44 +76,43 @@ def train_pixel(config):
     wandb.watch(agent.model)
 
   while global_step < config.n_steps:
-
-    state = env.reset()
+    states = envs.reset()
     score = 0
-    value, done = None, None
+    values, dones = None, None
     
-    for t in range(config.update_every):
-      steps += 1
-      global_step += 1
+    while agent.mem.isFull() == False:
+      global_step += config.num_env
 
-      action, log_prob, value, entr = agent.act(state)
-      next_state, reward, done, info = env.step(action)
-      agent.add_to_mem(state, action, reward, log_prob, done)
+      # Take actions
+      with torch.no_grad():
+        actions, log_probs, _, entrs = agent.act(states)
+        values = agent.model.get_values(states)
+      next_states, rewards, dones, infos = envs.step(actions)
 
-      # Update 
-      state = next_state
-      score += reward
+      # Add to memory buffer
+      agent.add_to_mem(states, actions, rewards, log_probs, dones)
+      # Update state
+      states = next_states
 
+      
       # Book Keeping
-      if (info["ale.lives"] == 0 and done):
-        config.tb_logger.add_scalar("charts/episode_reward", score, global_step)
-        if config.wandb:
-          wandb.log({
-            "episode_reward": score,
-            "global_step": global_step
-          })
-        
-        scores_deque.append(score)
-        scores.append(score)
-        average_scores.append(np.mean(scores_deque))
-
-        score = 0
-        state = env.reset()
+      for info in infos:
+        if 'episode' in info:
+          score = info['episode']['r']
+          config.tb_logger.add_scalar("charts/episode_reward", score, global_step)
+          if config.wandb:
+            wandb.log({
+              "episode_reward": score,
+              "global_step": global_step
+            })
+          
+          scores_deque.append(score)
+          scores.append(score)
+          average_scores.append(np.mean(scores_deque))
 
     # update and learn
-    value_loss, pg_loss, approx_kl, approx_entropy = agent.learn(config.num_learn, value.item(), done, global_step)
-
-    agent.mem.clear()
-    steps = 0
+    value_loss, pg_loss, approx_kl, approx_entropy, lr_now = agent.learn(config.num_learn, values, dones, global_step)
+    agent.mem.reset()
 
     # Book Keeping
     config.tb_logger.add_scalar("losses/value_loss", value_loss.item(), global_step)
@@ -126,9 +126,9 @@ def train_pixel(config):
         "policy_loss": pg_loss,
         "approx_kl": approx_kl,
         "approx_entropy": approx_entropy,
-        "global_step": global_step
+        "global_step": global_step,
+        "learning_rate": lr_now
        })
-
 
     print("Global Step: {}	Average Score: {:.2f}".format(global_step, np.mean(scores_deque)))   
 

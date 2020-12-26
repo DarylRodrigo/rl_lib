@@ -6,11 +6,12 @@ logs/
 dqn-complex-logs/
 dqn-save-points/
 dqn-static-logs/
-/runs/*
-/wandb/*
+runs/*
+wandb/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
+.pytest_cache/
 *.py[cod]
 *$py.class
 

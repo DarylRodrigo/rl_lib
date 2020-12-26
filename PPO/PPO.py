@@ -7,7 +7,7 @@ import numpy as np
 
 class PPOBase:
   def __init__(self, config):
-    self.mem = config.memory()
+    self.mem = config.memory(config.update_every, config.num_env, config.env, config.device)
 
     self.lr = config.lr
     self.n_steps = config.n_steps
@@ -94,96 +94,84 @@ class PPOPixel(PPOBase):
   def __init__(self, config):
     super(PPOPixel, self).__init__(config)
     self.config = config
-
-  def state_shaper(self, state):
-    state = np.array(state).transpose((2, 0, 1))
-    state = torch.FloatTensor(state)
-    state = state.unsqueeze(0)
-    state = state.float() / 256
-
-    return state
-
+  
   def add_to_mem(self, state, action, reward, log_prob, done):
-    state = self.state_shaper(state)
     self.mem.add(state, action, reward, log_prob, done)
 
   def act(self, x):
-    x = self.state_shaper(x).to(self.config.device)
+    x = x.to(self.config.device)
     return self.model_old.act(x)
 
   def learn(self, num_learn, last_value, next_done, global_step):
-    # For reference: This is similar to how baselines and Costa are doing it.
+    # Learning Rate Annealing
     frac = 1.0 - (global_step - 1.0) / self.n_steps
+    lr_now = self.lr * frac
     if self.lr_annealing:
-      self.optimiser.param_groups[0]['lr'] = self.lr * frac
+      self.optimiser.param_groups[0]['lr'] = lr_now
+    # Epsilon Annealing
     epsilon_now = self.epsilon
     if self.epsilon_annealing:
       epsilon_now = self.epsilon * frac
 
+    # Calculate discounted returns using rewards collected from environments
+    self.mem.calculate_discounted_returns(last_value, next_done)
+    
+    for i in range(num_learn):
+      # itterate over mini_batches
+      for mini_batch_idx in self.mem.get_mini_batch_idxs(mini_batch_size=256):
+
+                # Grab sample from memory
+        prev_states, prev_actions, prev_log_probs, discounted_returns = self.mem.sample(mini_batch_idx)
+
+        # find ratios
+        actions, log_probs, _, entropy = self.model.act(prev_states, prev_actions)
+        ratio = torch.exp(log_probs - prev_log_probs.detach())
+        
+        values = self.model_old.get_values(prev_states).reshape(-1)
+
+        # Stats
+        approx_kl = (prev_log_probs - log_probs).mean()
+
+        # calculate advantage & normalise
+        advantage = discounted_returns - values
+        advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-8)
+
+        # calculate surrogates
+        surrogate_1 = advantage * ratio
+        surrogate_2 = advantage * torch.clamp(ratio, 1-self.epsilon, 1+self.epsilon)
+
+        new_values = self.model.get_values(prev_states).view(-1)
+
+        # Calculate losses
+        new_values = self.model.get_values(prev_states).view(-1)
+
+        value_loss_unclipped = (new_values - discounted_returns)**2
+
+        values_clipped = values + torch.clamp(new_values - values, -epsilon_now, epsilon_now)
+        value_loss_clipped = (values_clipped - discounted_returns)**2
+
+        value_loss = 0.5 * torch.mean(torch.max(value_loss_clipped, value_loss_unclipped))
+
+        pg_loss = -torch.min(surrogate_1, surrogate_2).mean()
+        entropy_loss = entropy.mean()
+
+        loss = pg_loss + value_loss - self.entropy_beta*entropy_loss
+
+        # calculate gradient
+        self.optimiser.zero_grad()
+        loss.backward()
+        nn.utils.clip_grad_norm_(self.model.parameters(), 0.5)
+        self.optimiser.step()
+
+        if torch.abs(approx_kl) > 0.03:
+          break
+
+        _, new_log_probs, _, _ = self.model.act(prev_states, prev_actions)
+        if (prev_log_probs - new_log_probs).mean() > 0.03:
+          self.model.load_state_dict(self.model_old.state_dict())
+          break
+    
+    # TODO: Check if this is in the right place
     self.model_old.load_state_dict(self.model.state_dict())
 
-    # Calculate discounted rewards
-    bootstrap_length = self.config.update_every
-    discounted_returns = torch.zeros(bootstrap_length)
-    for t in reversed(range(bootstrap_length)):
-      # If first loop
-      if t == bootstrap_length - 1:
-        nextnonterminal = 1.0 - next_done
-        next_return = last_value
-      else:
-        nextnonterminal = 1.0 - self.mem.dones[t+1]
-        next_return = discounted_returns[t+1]
-      discounted_returns[t] = self.mem.rewards[t] + self.gamma * nextnonterminal * next_return
-
-    # normalise rewards
-    discounted_returns = torch.FloatTensor(discounted_returns).to(self.device)
-    discounted_returns = (discounted_returns - discounted_returns.mean()) / (discounted_returns.std() + 1e-8)
-    
-    # Fetch collected state, action and log_probs from memory & reshape for nn
-    prev_states = torch.stack(self.mem.states).reshape((-1,)+(4, 84, 84)).to(self.device).detach()
-    prev_actions = torch.stack(self.mem.actions).reshape(-1).to(self.device).detach()
-    prev_log_probs = torch.stack(self.mem.log_probs).reshape(-1).to(self.device).detach()
-
-    for i in range(num_learn):
-      # find ratios
-      actions, log_probs, values, entropy = self.model.act(prev_states, prev_actions)
-      ratio = torch.exp(log_probs - prev_log_probs.detach())
-      values = values.squeeze() * 0.5
-
-      # Stats
-      approx_kl = (prev_log_probs - log_probs).mean()
-      approx_entropy = entropy.mean()
-
-      # calculate advantage & normalise
-      advantage = discounted_returns - values
-      advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-8)
-
-      # calculate surrogates
-      surrogate_1 = ratio * advantage
-      surrogate_2 = torch.clamp(advantage, 1 - epsilon_now, 1 + epsilon_now)
-
-      # Calculate losses
-      values_clipped = last_value + torch.clamp(values - last_value, -epsilon_now, epsilon_now)
-      value_loss_unclipped = F.mse_loss(values, discounted_returns)
-      value_loss_clipped = F.mse_loss(values_clipped, discounted_returns)
-      value_loss = .5 * torch.mean(torch.max(value_loss_clipped, value_loss_unclipped))
-      pg_loss = -torch.min(surrogate_1, surrogate_2).mean()
-
-      loss = pg_loss + value_loss - self.entropy_beta*entropy
-      loss = loss.mean()
-
-      # calculate gradient
-      self.optimiser.zero_grad()
-      loss.backward()
-      nn.utils.clip_grad_norm_(self.model.parameters(), 0.5)
-      self.optimiser.step()
-
-      if torch.abs(approx_kl) > 0.03:
-        break
-
-      _, new_log_probs, _, _ = self.model.act(prev_states, prev_actions)
-      if (prev_log_probs - new_log_probs).mean() > 0.03:
-        self.model.load_state_dict(self.model_old.state_dict())
-        break
-
-    return value_loss, pg_loss, approx_kl, approx_entropy
+    return value_loss, pg_loss, approx_kl, entropy_loss, lr_now
