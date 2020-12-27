@@ -29,10 +29,10 @@ def train(config):
     for t in range(config.max_t):
       steps += 1
 
-      action, log_prob = agent.act(torch.FloatTensor(state))
+      action, log_prob, values, _ = agent.act(torch.FloatTensor(state))
       next_state, reward, done, _ = env.step(action.item())
 
-      agent.add_to_mem(state, action, reward, log_prob, done)
+      agent.add_to_mem(state, action, reward, log_prob, values, done)
 
       # Update 
       state = next_state
@@ -85,12 +85,11 @@ def train_pixel(config):
 
       # Take actions
       with torch.no_grad():
-        actions, log_probs, _, entrs = agent.act(states)
-        values = agent.model.get_values(states)
+        actions, log_probs, values, entrs = agent.act(states)
       next_states, rewards, dones, infos = envs.step(actions)
 
       # Add to memory buffer
-      agent.add_to_mem(states, actions, rewards, log_probs, dones)
+      agent.add_to_mem(states, actions, rewards, log_probs, values, dones)
       # Update state
       states = next_states
 

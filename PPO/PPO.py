@@ -95,8 +95,8 @@ class PPOPixel(PPOBase):
     super(PPOPixel, self).__init__(config)
     self.config = config
   
-  def add_to_mem(self, state, action, reward, log_prob, done):
-    self.mem.add(state, action, reward, log_prob, done)
+  def add_to_mem(self, state, action, reward, log_prob, values, done):
+    self.mem.add(state, action, reward, log_prob, values, done)
 
   def act(self, x):
     x = x.to(self.config.device)
@@ -108,20 +108,21 @@ class PPOPixel(PPOBase):
     lr_now = self.lr * frac
     if self.lr_annealing:
       self.optimiser.param_groups[0]['lr'] = lr_now
+
     # Epsilon Annealing
     epsilon_now = self.epsilon
     if self.epsilon_annealing:
       epsilon_now = self.epsilon * frac
 
-    # Calculate discounted returns using rewards collected from environments
-    self.mem.calculate_discounted_returns(last_value, next_done)
+    # Calculate advantage and discounted returns using rewards collected from environments
+    self.mem.calculate_advantage(last_value, next_done)
     
     for i in range(num_learn):
       # itterate over mini_batches
       for mini_batch_idx in self.mem.get_mini_batch_idxs(mini_batch_size=256):
 
-                # Grab sample from memory
-        prev_states, prev_actions, prev_log_probs, discounted_returns = self.mem.sample(mini_batch_idx)
+        # Grab sample from memory
+        prev_states, prev_actions, prev_log_probs, discounted_returns, advantage = self.mem.sample(mini_batch_idx)
 
         # find ratios
         actions, log_probs, _, entropy = self.model.act(prev_states, prev_actions)
@@ -131,10 +132,6 @@ class PPOPixel(PPOBase):
 
         # Stats
         approx_kl = (prev_log_probs - log_probs).mean()
-
-        # calculate advantage & normalise
-        advantage = discounted_returns - values
-        advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-8)
 
         # calculate surrogates
         surrogate_1 = advantage * ratio
