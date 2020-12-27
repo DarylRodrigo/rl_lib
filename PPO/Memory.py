@@ -3,8 +3,9 @@ import numpy as np
 import pdb
 
 class Memory:
-  def __init__(self, size, num_envs, env, device, gamma=0.99):
+  def __init__(self, size, num_envs, env, device, gamma=0.99, gae_lambda=0.95):
     self.gamma = gamma
+    self.gae_lambda = gae_lambda
     self.size = size
     self.device = device
     self.num_envs = num_envs
@@ -42,20 +43,37 @@ class Memory:
       for t in reversed(range(self.size)):
         # If first loop
         if t == self.size - 1:
-          nextnonterminal = 1.0 - torch.FloatTensor(next_done).reshape(-1).to(self.device)
+          next_non_terminal = 1.0 - torch.FloatTensor(next_done).reshape(-1).to(self.device)
           next_return = last_value.reshape(-1).to(self.device)
         else:
-          nextnonterminal = 1.0 - self.dones[t+1]
+          next_non_terminal = 1.0 - self.dones[t+1]
           next_return = self.discounted_returns[t+1]
-        self.discounted_returns[t] = self.rewards[t] + self.gamma * nextnonterminal * next_return
+        self.discounted_returns[t] = self.rewards[t] + self.gamma * next_non_terminal * next_return
   
   def calculate_advantage(self, last_value, next_done):
     self.calculate_discounted_returns(last_value, next_done)
     adv = self.discounted_returns - self.values
     self.advantages = (adv - adv.mean()) / (adv.std() + 1e-8)
 
-  def calculate_advantage_gae(self):
-    pass    
+  def calculate_advantage_gae(self, last_value, next_done):
+    self.advantages = torch.zeros((self.size, self.num_envs)).to(self.device)
+    self.discounted_returns = torch.zeros((self.size, self.num_envs)).to(self.device)
+    
+    with torch.no_grad():
+      prev_gae_advantage = 0
+      for t in reversed(range(self.size)):
+        if t == self.size - 1:
+          next_non_terminal = 1.0 - torch.FloatTensor(next_done).reshape(-1).to(self.device)
+          next_value = last_value.reshape(-1).to(self.device)
+        else:
+          next_non_terminal = 1.0 - self.dones[t+1]
+          next_value = self.values[t+1]
+
+        # pdb.set_trace()
+        delta = self.rewards[t] + self.gamma * next_value * next_non_terminal - self.values[t]
+        self.advantages[t] = self.gamma * self.gae_lambda * prev_gae_advantage * next_non_terminal + delta
+    
+    self.calculate_discounted_returns = self.advantages - self.values
 
   def sample(self, mini_batch_idx):
     if self.discounted_returns is None or self.advantages is None:
