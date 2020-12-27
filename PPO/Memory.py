@@ -71,9 +71,10 @@ class Memory:
 
         # pdb.set_trace()
         delta = self.rewards[t] + self.gamma * next_value * next_non_terminal - self.values[t]
-        self.advantages[t] = self.gamma * self.gae_lambda * prev_gae_advantage * next_non_terminal + delta
+        self.advantages[t] = prev_gae_advantage = self.gamma * self.gae_lambda * prev_gae_advantage * next_non_terminal + delta
     
-    self.calculate_discounted_returns = self.advantages - self.values
+    self.discounted_returns = self.advantages - self.values
+    pdb.set_trace()
 
   def sample(self, mini_batch_idx):
     if self.discounted_returns is None or self.advantages is None:
