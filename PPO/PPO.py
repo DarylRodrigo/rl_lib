@@ -130,7 +130,8 @@ class PPOPixel(PPOBase):
         actions, log_probs, _, entropy = self.model.act(prev_states, prev_actions)
         ratio = torch.exp(log_probs - prev_log_probs.detach())
         
-        values = self.model_old.get_values(prev_states).reshape(-1)
+        # values = self.model_old.get_values(prev_states).reshape(-1)
+        values = prev_values
         # adv = discounted_returns - values	
         # adv = (adv - adv.mean()) / (adv.std() + 1e-8)
         
