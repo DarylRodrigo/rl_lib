@@ -53,7 +53,7 @@ class Memory:
   def calculate_advantage(self, last_value, next_done):
     self.calculate_discounted_returns(last_value, next_done)
     adv = self.discounted_returns - self.values
-    self.advantages = (adv - adv.mean()) / (adv.std() + 1e-8)
+    
 
   def calculate_advantage_gae(self, last_value, next_done):
     self.advantages = torch.zeros((self.size, self.num_envs)).to(self.device)
@@ -69,12 +69,10 @@ class Memory:
           next_non_terminal = 1.0 - self.dones[t+1]
           next_value = self.values[t+1]
 
-        # pdb.set_trace()
         delta = self.rewards[t] + self.gamma * next_value * next_non_terminal - self.values[t]
         self.advantages[t] = prev_gae_advantage = self.gamma * self.gae_lambda * prev_gae_advantage * next_non_terminal + delta
     
-    self.discounted_returns = self.advantages - self.values
-    pdb.set_trace()
+    self.discounted_returns = self.advantages + self.values
 
   def sample(self, mini_batch_idx):
     if self.discounted_returns is None or self.advantages is None:

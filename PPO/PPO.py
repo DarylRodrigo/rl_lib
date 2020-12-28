@@ -124,6 +124,7 @@ class PPOPixel(PPOBase):
 
         # Grab sample from memory
         prev_states, prev_actions, prev_log_probs, discounted_returns, advantage = self.mem.sample(mini_batch_idx)
+        advantages = (advantage - advantage.mean()) / (advantage.std() + 1e-8)
 
         # find ratios
         actions, log_probs, _, entropy = self.model.act(prev_states, prev_actions)
@@ -135,10 +136,8 @@ class PPOPixel(PPOBase):
         approx_kl = (prev_log_probs - log_probs).mean()
 
         # calculate surrogates
-        surrogate_1 = advantage * ratio
-        surrogate_2 = advantage * torch.clamp(ratio, 1-self.epsilon, 1+self.epsilon)
-
-        new_values = self.model.get_values(prev_states).view(-1)
+        surrogate_1 = -advantage * ratio
+        surrogate_2 = -advantage * torch.clamp(ratio, 1-self.epsilon, 1+self.epsilon)
 
         # Calculate losses
         new_values = self.model.get_values(prev_states).view(-1)
@@ -150,7 +149,8 @@ class PPOPixel(PPOBase):
 
         value_loss = 0.5 * torch.mean(torch.max(value_loss_clipped, value_loss_unclipped))
 
-        pg_loss = -torch.min(surrogate_1, surrogate_2).mean()
+        # pg_loss = -torch.min(surrogate_1, surrogate_2).mean()
+        pg_loss = torch.max(surrogate_1, surrogate_2).mean()
         entropy_loss = entropy.mean()
 
         loss = pg_loss + value_loss - self.entropy_beta*entropy_loss
