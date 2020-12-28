@@ -132,8 +132,11 @@ class PPOPixel(PPOBase):
         
         values = self.model_old.get_values(prev_states).reshape(-1)
 
-        advantage = discounted_returns - values	
-        advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-8)
+        adv = discounted_returns - values	
+        adv = (adv - adv.mean()) / (adv.std() + 1e-8)
+
+        pdb.set_trace()
+        
 
         # Stats
         approx_kl = (prev_log_probs - log_probs).mean()

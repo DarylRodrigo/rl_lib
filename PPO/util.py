@@ -84,8 +84,8 @@ def train_pixel(config):
       global_step += config.num_env
 
       # Take actions
-      with torch.no_grad():
-        actions, log_probs, values, entrs = agent.act(states)
+      # with torch.no_grad():
+      actions, log_probs, values, entrs = agent.act(states)
       next_states, rewards, dones, infos = envs.step(actions)
 
       # Add to memory buffer
