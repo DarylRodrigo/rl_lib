@@ -32,15 +32,17 @@ def test_add_step_to_memory():
 
   # Only 1 because single step taken
   log_probs = torch.rand((1, num_envs))
+  values = torch.rand((1, num_envs))
   
   # Add to memory
-  mem.add(states, actions, rewards, log_probs, dones)
+  mem.add(states, actions, rewards, log_probs, values, dones)
 
   assert torch.equal(mem.states[0], torch.FloatTensor(states))
   assert torch.equal(mem.actions[0], actions.type(torch.FloatTensor))
   assert torch.equal(mem.rewards[0], torch.FloatTensor(rewards).reshape(-1))
   assert torch.equal(mem.log_probs[0], log_probs.type(torch.FloatTensor).reshape(-1))
   assert torch.equal(mem.dones[0], torch.FloatTensor(dones).reshape(-1))
+  assert torch.equal(mem.values[0], values.type(torch.FloatTensor).reshape(-1))
   assert mem.idx == 1
 
 def test_calculating_discounted_returns_single_reward():
@@ -60,7 +62,7 @@ def test_calculating_discounted_returns_single_reward():
 
   # Calculate returns
   last_value = torch.FloatTensor([0.0,0.0]).to(device)
-  mem.calculate_discounted_returns(last_value, [0,0])
+  mem.calculate_advantage(last_value, [0,0])
 
   # Check discounted returns
   dr = [0.9606,0.9703,0.9801,0.9900,1.0000,0.0000,0.0000,0.0000,0.0000,0.0000]
@@ -85,7 +87,7 @@ def test_calculating_discounted_returns_with_done():
 
   # Calculate returns
   last_value = torch.FloatTensor([0.0,0.0]).to(device)
-  mem.calculate_discounted_returns(last_value, [0,0])
+  mem.calculate_advantage(last_value, [0,0])
 
   # Check discounted returns
   dr = [0.0000,0.9703,0.9801,0.9900,1.0000,0.0000,0.0000,0.0000,0.0000,0.0000]
@@ -110,7 +112,7 @@ def test_calculating_discounted_returns_with_done_and_last_value():
 
   # Calculate returns
   last_value = torch.FloatTensor([0.5,0.5]).to(device)
-  mem.calculate_discounted_returns(last_value, [0,0])
+  mem.calculate_advantage(last_value, [0,0])
 
   # Check discounted returns
   dr = [0.000000,1.427058,1.441472,1.456033,1.470740,0.475495,0.480298,0.485150,0.490050,0.495000]
@@ -137,7 +139,7 @@ def test_calculating_discounted_returns_with_done_and_neg_last_value():
 
   # Calculate returns
   last_value = torch.FloatTensor([-0.5,-0.5]).to(device)
-  mem.calculate_discounted_returns(last_value, [0,0])
+  mem.calculate_advantage(last_value, [0,0])
 
   # Check discounted returns
   dr = [0.00000000,0.51354039,0.51872766,0.52396733,0.52925992,-0.47549507,-0.48029804,-0.48514953,-0.49005002,-0.49500000]
@@ -157,8 +159,8 @@ def test_sample_memory():
   mem.dones = torch.FloatTensor([[0, 0], [0, 0], [0, 0]])
   
   last_value = torch.FloatTensor([0.0,0.0]).to(device)
-  mem.calculate_discounted_returns(last_value, [0,0])
-  s, a, lp, dr = mem.sample([0,2,4])
+  mem.calculate_advantage(last_value, [0,0])
+  s, a, lp, dr, adv = mem.sample([0,2,4])
   
   assert torch.equal(lp, torch.FloatTensor([1,3,5]))
   assert torch.allclose(dr, torch.FloatTensor([[0.9801,0.9900, 1]]))

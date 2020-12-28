@@ -52,7 +52,7 @@ class Memory:
   
   def calculate_advantage(self, last_value, next_done):
     self.calculate_discounted_returns(last_value, next_done)
-    adv = self.discounted_returns - self.values
+    self.advantages = self.discounted_returns - self.values
     
 
   def calculate_advantage_gae(self, last_value, next_done):

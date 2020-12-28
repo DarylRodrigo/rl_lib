@@ -115,8 +115,8 @@ class PPOPixel(PPOBase):
       epsilon_now = self.epsilon * frac
 
     # Calculate advantage and discounted returns using rewards collected from environments
-    # self.mem.calculate_advantage(last_value, next_done)
-    self.mem.calculate_advantage_gae(last_value, next_done)
+    self.mem.calculate_advantage(last_value, next_done)
+    # self.mem.calculate_advantage_gae(last_value, next_done)
     
     for i in range(num_learn):
       # itterate over mini_batches
