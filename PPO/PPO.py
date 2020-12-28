@@ -131,13 +131,9 @@ class PPOPixel(PPOBase):
         ratio = torch.exp(log_probs - prev_log_probs.detach())
         
         values = self.model_old.get_values(prev_states).reshape(-1)
-
-        adv = discounted_returns - values	
-        adv = (adv - adv.mean()) / (adv.std() + 1e-8)
-
-        # pdb.set_trace()
+        # adv = discounted_returns - values	
+        # adv = (adv - adv.mean()) / (adv.std() + 1e-8)
         
-
         # Stats
         approx_kl = (prev_log_probs - log_probs).mean()
 
@@ -162,7 +158,7 @@ class PPOPixel(PPOBase):
 
         # calculate gradient
         self.optimiser.zero_grad()
-        loss.backward()
+        loss.backward(retain_graph=True)
         nn.utils.clip_grad_norm_(self.model.parameters(), 0.5)
         self.optimiser.step()
 
