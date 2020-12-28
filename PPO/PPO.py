@@ -135,7 +135,7 @@ class PPOPixel(PPOBase):
         adv = discounted_returns - values	
         adv = (adv - adv.mean()) / (adv.std() + 1e-8)
 
-        pdb.set_trace()
+        # pdb.set_trace()
         
 
         # Stats
