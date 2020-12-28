@@ -115,8 +115,8 @@ class PPOPixel(PPOBase):
       epsilon_now = self.epsilon * frac
 
     # Calculate advantage and discounted returns using rewards collected from environments
-    self.mem.calculate_advantage(last_value, next_done)
-    # self.mem.calculate_advantage_gae(last_value, next_done)
+    # self.mem.calculate_advantage(last_value, next_done)
+    self.mem.calculate_advantage_gae(last_value, next_done)
     
     for i in range(num_learn):
       # itterate over mini_batches
@@ -130,8 +130,7 @@ class PPOPixel(PPOBase):
         actions, log_probs, _, entropy = self.model.act(prev_states, prev_actions)
         ratio = torch.exp(log_probs - prev_log_probs.detach())
         
-        # values = self.model_old.get_values(prev_states).reshape(-1)
-        values = prev_values
+        values = self.model_old.get_values(prev_states).reshape(-1)
         # adv = discounted_returns - values	
         # adv = (adv - adv.mean()) / (adv.std() + 1e-8)
         
@@ -139,8 +138,8 @@ class PPOPixel(PPOBase):
         approx_kl = (prev_log_probs - log_probs).mean()
 
         # calculate surrogates
-        surrogate_1 = advantage * ratio
-        surrogate_2 = advantage * torch.clamp(ratio, 1-self.epsilon, 1+self.epsilon)
+        surrogate_1 = advantages * ratio
+        surrogate_2 = advantages * torch.clamp(ratio, 1-self.epsilon, 1+self.epsilon)
 
         # Calculate losses
         new_values = self.model.get_values(prev_states).view(-1)
@@ -152,10 +151,12 @@ class PPOPixel(PPOBase):
 
         value_loss = 0.5 * torch.mean(torch.max(value_loss_clipped, value_loss_unclipped))
 
+
         pg_loss = -torch.min(surrogate_1, surrogate_2).mean()
         entropy_loss = entropy.mean()
 
         loss = pg_loss + value_loss - self.entropy_beta*entropy_loss
+        pdb.set_trace()
 
         # calculate gradient
         self.optimiser.zero_grad()
