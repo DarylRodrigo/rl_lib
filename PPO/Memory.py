@@ -84,9 +84,10 @@ class Memory:
     actions = self.actions.reshape((-1,)+self.action_shape)
     log_probs = self.log_probs.reshape(-1)
     advantages = self.advantages.reshape(-1)
+    values = self.values.reshape(-1)
 
     # return samples
-    return states[mini_batch_idx], actions[mini_batch_idx], log_probs[mini_batch_idx], discounted_returns[mini_batch_idx], advantages[mini_batch_idx]
+    return states[mini_batch_idx], actions[mini_batch_idx], log_probs[mini_batch_idx], discounted_returns[mini_batch_idx], advantages[mini_batch_idx], values[mini_batch_idx]
   
   def isFull(self):
     return self.idx == self.size
