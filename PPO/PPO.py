@@ -7,11 +7,19 @@ import numpy as np
 
 class PPOBase:
   def __init__(self, config):
-    self.mem = config.memory(config.update_every, config.num_env, config.env, config.device)
+    self.mem = config.memory(
+      config.update_every,
+      config.num_env, 
+      config.env, 
+      config.device, 
+      config.gamma, 
+      config.gae_lambda
+    )
 
     self.lr = config.lr
     self.n_steps = config.n_steps
     self.lr_annealing = config.lr_annealing
+    self.gae = config.gae
     self.epsilon_annealing = config.epsilon_annealing
     self.gamma = config.gamma
     self.epsilon = config.epsilon
@@ -131,8 +139,6 @@ class PPOPixel(PPOBase):
         ratio = torch.exp(log_probs - prev_log_probs.detach())
         
         values = self.model_old.get_values(prev_states).reshape(-1)
-        # adv = discounted_returns - values	
-        # adv = (adv - adv.mean()) / (adv.std() + 1e-8)
         
         # Stats
         approx_kl = (prev_log_probs - log_probs).mean()
@@ -145,10 +151,8 @@ class PPOPixel(PPOBase):
         new_values = self.model.get_values(prev_states).view(-1)
 
         value_loss_unclipped = (new_values - discounted_returns)**2
-
         values_clipped = values + torch.clamp(new_values - values, -epsilon_now, epsilon_now)
         value_loss_clipped = (values_clipped - discounted_returns)**2
-
         value_loss = 0.5 * torch.mean(torch.max(value_loss_clipped, value_loss_unclipped))
 
 
@@ -156,7 +160,6 @@ class PPOPixel(PPOBase):
         entropy_loss = entropy.mean()
 
         loss = pg_loss + value_loss - self.entropy_beta*entropy_loss
-        pdb.set_trace()
 
         # calculate gradient
         self.optimiser.zero_grad()
