@@ -27,7 +27,6 @@ class Config:
     self.max_t = 100
     self.update_every = 100
 
-    # TODO set as decaying and pass into learn from PPO
     self.epsilon = 0.1
     self.eps_start = 1.0
     self.eps_end = 0.01
@@ -38,6 +37,8 @@ class Config:
     self.hidden_size = 64
 
     self.memory = None
+    self.gae = True
+    self.gae_lambda = 0.95
     self.batch_size = 64
     self.buffer_size = int(1e5)
     self.lr_annealing = False
