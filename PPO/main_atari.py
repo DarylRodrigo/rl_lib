@@ -28,6 +28,6 @@ config.head_model = functools.partial(cnn_head_model, config)
 config.actor_model = functools.partial(actor_model, config)
 config.critic_model = functools.partial(critic_model, config)
 
-# config.init_wandb()
+config.init_wandb()
 
 scores = train_pixel(config)
