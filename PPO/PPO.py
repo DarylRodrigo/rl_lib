@@ -163,7 +163,7 @@ class PPOPixel(PPOBase):
 
         # calculate gradient
         self.optimiser.zero_grad()
-        loss.backward(retain_graph=True)
+        loss.backward()
         nn.utils.clip_grad_norm_(self.model.parameters(), 0.5)
         self.optimiser.step()
 
