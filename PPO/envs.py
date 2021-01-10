@@ -4,7 +4,9 @@ import numpy as np
 from collections import deque
 import gym
 from gym import spaces
+import time
 import cv2
+from gym.wrappers import Monitor
 import torch
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecEnvWrapper
 cv2.ocl.setUseOpenCL(False)
@@ -342,6 +344,10 @@ def make_env(gym_id, seed, idx):
                 scale=False,
             )
         )
+
+        if idx == 0:
+            env = Monitor(env, f'videos/{gym_id}{int(time.time())}')
+
         env.seed(seed)
         env.action_space.seed(seed)
         env.observation_space.seed(seed)

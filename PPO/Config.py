@@ -68,7 +68,7 @@ class Config:
     pprint(vars(self))
   
   def init_wandb(self, project="rl-lib", entity="procgen"):
-    wandb.init(project="rl-lib", entity="procgen", sync_tensorboard=True)
+    wandb.init(project="rl-lib", entity="procgen", sync_tensorboard=True, monitor_gym=True)
 
     wandb.config.update({
       "seed": self.seed,
