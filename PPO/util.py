@@ -71,12 +71,12 @@ def train_pixel(config):
   global_step = 0
 
   agent = PPOPixel(config)
+  states = envs.reset()
 
   if config.wandb:
     wandb.watch(agent.model)
 
   while global_step < config.n_steps:
-    states = envs.reset()
     score = 0
     values, dones = None, None
     
@@ -128,7 +128,11 @@ def train_pixel(config):
         "global_step": global_step,
         "learning_rate": lr_now
        })
+    
+    if (global_step % agent.mem.size * 100 == 0):
+      agent.save(global_step)
 
     print("Global Step: {}	Average Score: {:.2f}".format(global_step, np.mean(scores_deque)))   
 
+  agent.save(global_step)
   return scores, average_scores

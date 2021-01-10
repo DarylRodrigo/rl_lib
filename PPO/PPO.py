@@ -4,6 +4,7 @@ import torch.nn.functional as F
 import torch.nn as nn
 import pdb
 import numpy as np
+import wandb
 
 class PPOBase:
   def __init__(self, config):
@@ -41,6 +42,11 @@ class PPOBase:
 
   def learn(self, num_learn):
     raise NotImplemented
+
+  def save(self, global_step):
+    print("Saving weights")
+    torch.save(self.model.state_dict(), '/tmp/{global_step}_checkpoint.pth')
+    wandb.save('/tmp/{global_step}_checkpoint.pth')
 
 class PPOClassical(PPOBase):
   def __init__(self, config):
