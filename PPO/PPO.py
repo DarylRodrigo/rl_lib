@@ -91,7 +91,7 @@ class PPOClassical(PPOBase):
 
       loss = loss.mean()
 
-      # calculate gradient
+      # Update loss
       self.optimiser.zero_grad()
       loss.backward()
       self.optimiser.step()
@@ -122,17 +122,21 @@ class PPOPixel(PPOBase):
     if self.epsilon_annealing:
       epsilon_now = self.epsilon * frac
 
-    # Calculate advantage and discounted returns using rewards collected from environments
-    # self.mem.calculate_advantage(last_value, next_done)
-    self.mem.calculate_advantage_gae(last_value, next_done)
-    
+    # Calculate advantages
+    if self.gae:
+      self.mem.calculate_advantage_gae(last_value, next_done)
+    else:
+      self.mem.calculate_advantage(last_value, next_done)
+
     for i in range(num_learn):
       # itterate over mini_batches
-      for mini_batch_idx in self.mem.get_mini_batch_idxs(mini_batch_size=256):
+      for mini_batch_idx in self.mem.get_mini_batch_idxs(mini_batch_size=self.config.batch_size):
 
         # Grab sample from memory
         prev_states, prev_actions, prev_log_probs, discounted_returns, advantage, prev_values = self.mem.sample(mini_batch_idx)
-        advantages = (advantage - advantage.mean()) / (advantage.std() + 1e-8)
+
+        if self.config.normalise_advantages:
+          advantages = (advantage - advantage.mean()) / (advantage.std() + 1e-8)
 
         # find ratios
         actions, log_probs, _, entropy = self.model.act(prev_states, prev_actions)
@@ -149,11 +153,14 @@ class PPOPixel(PPOBase):
 
         # Calculate losses
         new_values = self.model.get_values(prev_states).view(-1)
-
-        value_loss_unclipped = (new_values - discounted_returns)**2
-        values_clipped = values + torch.clamp(new_values - values, -epsilon_now, epsilon_now)
-        value_loss_clipped = (values_clipped - discounted_returns)**2
-        value_loss = 0.5 * torch.mean(torch.max(value_loss_clipped, value_loss_unclipped))
+        
+        if self.config.clip_value_loss:
+          value_loss_unclipped = (new_values - discounted_returns)**2
+          values_clipped = values + torch.clamp(new_values - values, -epsilon_now, epsilon_now)
+          value_loss_clipped = (values_clipped - discounted_returns)**2
+          value_loss = 0.5 * torch.mean(torch.max(value_loss_clipped, value_loss_unclipped))
+        else:
+          value_loss = 0.5 * (advantage - discounted_returns)**2
 
 
         pg_loss = -torch.min(surrogate_1, surrogate_2).mean()

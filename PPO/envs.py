@@ -305,8 +305,8 @@ class ImageToPyTorch(gym.ObservationWrapper):
 def wrap_pytorch(env):
     return ImageToPyTorch(env)
 
-    from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecEnvWrapper
 
+from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecEnvWrapper
 class VecPyTorch(VecEnvWrapper):
     def __init__(self, venv, device):
         super(VecPyTorch, self).__init__(venv)
@@ -327,6 +327,7 @@ class VecPyTorch(VecEnvWrapper):
         reward = torch.from_numpy(reward).unsqueeze(dim=1).float()
         return obs, reward, done, info
 
+# From CleanRL - https://github.com/vwxyzjn/cleanrl/blob/fa1a92f6ce72fc9ae3fa6d735f3c9c8adf1af2da/cleanrl/ppo_atari.py#L431
 def make_env(gym_id, seed, idx):
     def thunk():
         env = gym.make(gym_id)

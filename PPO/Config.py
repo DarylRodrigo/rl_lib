@@ -39,12 +39,14 @@ class Config:
     self.memory = None
     self.gae = True
     self.gae_lambda = 0.95
-    self.batch_size = 64
+    self.batch_size = 256
     self.buffer_size = int(1e5)
     self.lr_annealing = False
     self.epsilon_annealing = False
     self.learn_every = 4
     self.entropy_beta = 0.01
+    self.normalise_advantages = True
+    self.clip_value_loss = True
 
     self.model = None
 
@@ -81,10 +83,15 @@ class Config:
       "hidden_size": self.hidden_size,
       "batch_size": self.batch_size,
       "buffer_size": self.buffer_size,
-      "lr_annealing": self.lr_annealing,
       "learn_every": self.learn_every,
       "entropy_beta": self.entropy_beta,
-      "update_every": self.update_every
+      "update_every": self.update_every,
+      "lr_annealing": self.lr_annealing,
+      "gae": self.gae,
+      "gae_lambda": self.gae_lambda,
+      "normalise_advantages": self.normalise_advantages,
+      "clip_value_loss": self.clip_value_loss
+
     })
 
     self.wandb = True
