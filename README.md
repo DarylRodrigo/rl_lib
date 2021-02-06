@@ -61,7 +61,7 @@ These were mainly referenced from a really good lecture series by Colin Skow on 
 </p>
 
 ### PPO Atari - with Baseline Enhancementes
-- Code and results can be found under `Policy Gradient/5. PPO.ipynb`
+- Code and results can be found under `PPO/`
 <p>
   <img src="./PPO/img/video.1_24410_6238887b-2.gif" alt="Drawing" height="200"/>
 </p>
