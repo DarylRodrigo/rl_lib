@@ -46,13 +46,6 @@ These were mainly referenced from a really good lecture series by Colin Skow on 
   <img src="./DQN/img/vanilla_atari_pong/atari_pong_vanilla_dqn.gif" alt="Drawing" height="200"/>
 </p>
 
-### PPO discrete
-- Solved in 409 episodes
-- Code and results can be found under `Policy Gradient/5. PPO.ipynb`
-<p>
-  <img src="./Policy Gradient/img/ppo/lunar-lander.gif" alt="Drawing" height="200"/>
-</p>
-
 ### DDPG Continuous
 - Converged to ~ -270 after a 100 episodes
 - Code and results can be found under `Policy Gradient/4. DDPG.ipynb.ipynb`
@@ -60,9 +53,20 @@ These were mainly referenced from a really good lecture series by Colin Skow on 
   <img src="./Policy Gradient/img/ppo/pendulum-continuous-ppo.gif" alt="Drawing" height="200"/>
 </p>
 
+### PPO discrete
+- Solved in 409 episodes
+- Code and results can be found under `Policy Gradient/5. PPO.ipynb`
+<p>
+  <img src="./Policy Gradient/img/ppo/lunar-lander.gif" alt="Drawing" height="200"/>
+</p>
+
+### PPO Atari - with Baseline Enhancementes
+- Code and results can be found under `Policy Gradient/5. PPO.ipynb`
+<p>
+  <img src="./PPO/img/video.1_24410_6238887b-2.gif" alt="Drawing" height="200"/>
+</p>
+
 ## Todo
-- General Advantage Estimator
-- Pull Policy Gradient algorithms into seperate files
 - Curiousity Driven Exploration
 - HER (Hindsight Experience Replay)
 - Recurrent networks in PPO and DDPG
@@ -71,5 +75,6 @@ These were mainly referenced from a really good lecture series by Colin Skow on 
 
 Whilst I tried to code everything directly from the papers, it wasn't always easy to understand what I was doing wrong when the algorithm just wouldn't train or I got runtime errors. As such I used the following repositories as references.
 
+- [https://github.com/vwxyzjn/cleanrl.git](https://github.com/vwxyzjn/cleanrl.git)
 - [https://github.com/nikhilbarhate99/PPO-PyTorch.git](https://github.com/nikhilbarhate99/PPO-PyTorch.git)
 - [https://github.com/hermesdt/reinforcement-learning.git](https://github.com/hermesdt/reinforcement-learning.git)
