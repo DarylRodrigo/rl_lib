@@ -1,6 +1,6 @@
 # PPO Implementation
 
-To run training run:
+To start training run:
 
 ```
 python main_atari.py
