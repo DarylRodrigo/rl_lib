@@ -60,7 +60,7 @@ These were mainly referenced from a really good lecture series by Colin Skow on 
   <img src="./Policy Gradient/img/ppo/lunar-lander.gif" alt="Drawing" height="200"/>
 </p>
 
-### PPO Atari - with Baseline Enhancementes
+### PPO Atari - with Baseline Enhancements
 - Code and results can be found under `PPO/`
 <p>
   <img src="./PPO/img/video.1_24410_6238887b-2.gif" alt="Drawing" height="200"/>
