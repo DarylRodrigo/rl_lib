@@ -37,6 +37,10 @@ These were mainly referenced from a really good lecture series by Colin Skow on 
 - **Dynamic Programming**
 - **Q learning**
 
+## Associated Articles
+- Tutorial on PPO: [A Graphic Guide to Implementing PPO for Atari Games](https://medium.com/@DarylRodrigo_12906/a-graphic-guide-to-implementing-ppo-for-atari-games-5740ccbe3fbc)
+
+
 ## Results
 
 ### DQN Pong
