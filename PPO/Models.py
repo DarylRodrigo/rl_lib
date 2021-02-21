@@ -56,6 +56,33 @@ class ActorCritic(nn.Module):
     def __init__(self, config):
         super(ActorCritic, self).__init__()
         self.network = nn.Sequential(
+            layer_init(nn.Linear(config.observation_space, 52), std=0.01),
+            nn.ReLU(),
+            layer_init(nn.Linear(52, config.action_space), std=0.01),
+            nn.ReLU()
+        )
+        self.actor = layer_init(nn.Linear(52, config.action_space), std=0.01)
+        self.critic = layer_init(nn.Linear(52, 1), std=1)
+
+    def forward(self, x):
+        return self.network(x)
+
+    def act(self, x, action=None):
+        values = self.critic(self.forward(x))
+        logits = self.actor(self.forward(x))
+        probs = Categorical(logits=logits)
+        if action is None:
+            action = probs.sample()
+        return action, probs.log_prob(action), values, probs.entropy()
+    
+    def get_values(self, x):
+        return self.critic(self.forward(x))
+
+
+class ActorCriticCnn(nn.Module):
+    def __init__(self, config):
+        super(ActorCriticCnn, self).__init__()
+        self.network = nn.Sequential(
             Scale(1/255),
             layer_init(nn.Conv2d(4, 32, 8, stride=4)),
             nn.ReLU(),
