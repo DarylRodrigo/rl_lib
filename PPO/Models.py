@@ -56,9 +56,9 @@ class ActorCritic(nn.Module):
     def __init__(self, config):
         super(ActorCritic, self).__init__()
         self.network = nn.Sequential(
-            layer_init(nn.Linear(config.observation_space, 52), std=0.01),
+            layer_init(nn.Linear(config.state_space, 52), std=0.01),
             nn.ReLU(),
-            layer_init(nn.Linear(52, config.action_space), std=0.01),
+            layer_init(nn.Linear(52, 52), std=0.01),
             nn.ReLU()
         )
         self.actor = layer_init(nn.Linear(52, config.action_space), std=0.01)
