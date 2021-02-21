@@ -34,19 +34,19 @@ def runCartpole():
   env_id = "CartPole-v1"
   config = Config(env_id)
 
-  config.update_every = 64
-  config.num_learn = 4
-  config.win_condition = 230
-  config.n_steps = 5e4
+  config.update_every = 256
+  config.num_learn = 20
+  config.win_condition = 200
+  config.n_steps = 1e5
   config.hidden_size = 512
-  config.lr = 2.5e-4
-  config.lr_annealing = True
+  config.lr = 0.002
+  # config.lr_annealing = True
   config.epsilon_annealing = True
 
   config.memory = Memory
   config.model = ActorCritic
 
-  # config.init_wandb()
+  config.init_wandb(project="gym", entity="procgen")
 
   scores, average_scores = train(config)
 

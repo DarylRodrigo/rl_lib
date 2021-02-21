@@ -40,7 +40,7 @@ class Config:
     self.gae = True
     self.gae_lambda = 0.95
     self.batch_size = 64
-    self.buffer_size = int(1e5)
+    # self.buffer_size = int(1e5)
     self.lr_annealing = False
     self.epsilon_annealing = False
     self.learn_every = 4
@@ -66,9 +66,10 @@ class Config:
     pprint(vars(self))
   
   def init_wandb(self, project="rl-lib", entity="procgen"):
-    wandb.init(project="rl-lib", entity="procgen", sync_tensorboard=True)
+    wandb.init(project=project, entity=entity, sync_tensorboard=True)
 
     wandb.config.update({
+      "env_id": self.env_id,
       "seed": self.seed,
       "n_episodes": self.n_episodes,
       "max_t": self.max_t,
@@ -80,7 +81,6 @@ class Config:
       "lr": self.lr,
       "hidden_size": self.hidden_size,
       "batch_size": self.batch_size,
-      "buffer_size": self.buffer_size,
       "lr_annealing": self.lr_annealing,
       "learn_every": self.learn_every,
       "entropy_beta": self.entropy_beta,
