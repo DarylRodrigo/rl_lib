@@ -56,13 +56,13 @@ class ActorCritic(nn.Module):
     def __init__(self, config):
         super(ActorCritic, self).__init__()
         self.network = nn.Sequential(
-            layer_init(nn.Linear(config.state_space, 52), std=0.01),
+            layer_init(nn.Linear(config.state_space, config.hidden_size), std=0.01),
             nn.ReLU(),
-            layer_init(nn.Linear(52, 52), std=0.01),
+            layer_init(nn.Linear(config.hidden_size, config.hidden_size), std=0.01),
             nn.ReLU()
         )
-        self.actor = layer_init(nn.Linear(52, config.action_space), std=0.01)
-        self.critic = layer_init(nn.Linear(52, 1), std=1)
+        self.actor = layer_init(nn.Linear(config.hidden_size, config.action_space), std=0.01)
+        self.critic = layer_init(nn.Linear(config.hidden_size, 1), std=1)
 
     def forward(self, x):
         return self.network(x)
@@ -91,11 +91,11 @@ class ActorCriticCnn(nn.Module):
             layer_init(nn.Conv2d(64, 64, 3, stride=1)),
             nn.ReLU(),
             nn.Flatten(),
-            layer_init(nn.Linear(3136, 512)),
+            layer_init(nn.Linear(3136, config.hidden_size)),
             nn.ReLU()
         )
-        self.actor = layer_init(nn.Linear(512, config.action_space), std=0.01)
-        self.critic = layer_init(nn.Linear(512, 1), std=1)
+        self.actor = layer_init(nn.Linear(config.hidden_size, config.action_space), std=0.01)
+        self.critic = layer_init(nn.Linear(config.hidden_size, 1), std=1)
 
     def forward(self, x):
         return self.network(x)

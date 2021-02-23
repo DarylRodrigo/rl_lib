@@ -40,7 +40,6 @@ class Config:
     self.gae = True
     self.gae_lambda = 0.95
     self.batch_size = 64
-    # self.buffer_size = int(1e5)
     self.lr_annealing = False
     self.epsilon_annealing = False
     self.learn_every = 4
@@ -84,7 +83,8 @@ class Config:
       "lr_annealing": self.lr_annealing,
       "learn_every": self.learn_every,
       "entropy_beta": self.entropy_beta,
-      "update_every": self.update_every
+      "update_every": self.update_every,
+      "num_learn": self.num_learn
     })
 
     self.wandb = True
