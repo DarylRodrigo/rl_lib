@@ -10,10 +10,11 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pdb
 
 def runAtari():
   env_id = "BreakoutNoFrameskip-v4"
-  config = Config(env_id)
+  config = Config(env_id, atari=True)
 
   config.update_every = 128
   config.num_learn = 4
@@ -27,11 +28,9 @@ def runAtari():
   config.memory = Memory
   config.model = ActorCriticCnn
 
-  envs = VecPyTorch(DummyVecEnv([make_atari_env(config.env_id, config.seed+i, i) for i in range(config.num_env)]), config.device)
-
   # config.init_wandb()
 
-  scores, average_scores = train(config, envs)
+  scores, average_scores = train(config, config.env)
 
 def runGym():
   env_id = "CartPole-v1"
@@ -49,12 +48,13 @@ def runGym():
   config.memory = Memory
   config.model = ActorCritic
 
-  envs = VecPyTorch(DummyVecEnv([make_env(config.env_id, config.seed+i, i) for i in range(config.num_env)]), config.device)
+  # config.init_wandb(project="gym", entity="procgen")
 
-  scores, average_scores = train(config, envs)
+  scores, average_scores = train(config, config.env)
 
 def runLunarLander():
   env_id = "LunarLander-v2"
+  
   config = Config(env_id)
 
   config.update_every = 256*4
@@ -69,11 +69,9 @@ def runLunarLander():
   config.memory = Memory    
   config.model = ActorCritic
 
-  envs = VecPyTorch(DummyVecEnv([make_env(config.env_id, config.seed+i, i) for i in range(config.num_env)]), config.device)
-
   config.init_wandb(project="gym", entity="procgen")
 
-  scores, average_scores = train(config, envs)
+  scores, average_scores = train(config, config.env)
 
 runAtari()
 

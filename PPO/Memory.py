@@ -23,11 +23,9 @@ class Memory:
     self.discounted_returns = None
   
   def add(self, states, actions, rewards, log_probs, values, dones):
-    pdb.set_trace()
     if (self.idx > self.size - 1):
       raise Exception("Memory out of space") 
     
-    # pdb.set_trace()
     self.states[self.idx] = states
     self.actions[self.idx] = actions
     self.rewards[self.idx] = torch.FloatTensor(rewards.reshape(-1)).to(self.device)

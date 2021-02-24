@@ -3,22 +3,27 @@ from pprint import pprint
 import wandb
 import time
 import torch
-from envs import make_env, VecPyTorch
+from envs import make_env, make_atari_env, VecPyTorch
 from stable_baselines3.common.vec_env import DummyVecEnv
 import random
 import numpy as np
 
 class Config:
-  def __init__(self, env_id):
+  def __init__(self, env_id, atari=False):
     self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Running experiment with device: {}".format(self.device))
     self.seed = 1
     self.num_env = 8
 
     self.env_id = env_id
-    self.env = VecPyTorch(DummyVecEnv([make_env(env_id, self.seed+i, i) for i in range(self.num_env)]), self.device)
-    self.state_space = self.env.observation_space.shape[0]
-    self.action_space = self.env.action_space.n
+    if (atari):
+      self.env  = VecPyTorch(DummyVecEnv([make_atari_env(self.env_id, self.seed+i, i) for i in range(self.num_env)]), self.device)
+      self.state_space = self.env.observation_space.shape[0]
+      self.action_space = self.env.action_space.n
+    else:
+      self.env = VecPyTorch(DummyVecEnv([make_env(self.env_id, self.seed+i, i) for i in range(self.num_env)]), self.device)
+      self.state_space = self.env.observation_space.shape[0]
+      self.action_space = self.env.action_space.n
 
     self.win_condition = None
 
