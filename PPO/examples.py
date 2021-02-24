@@ -12,9 +12,30 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pdb
 
+
+def runProcGen():
+  env_id = "starpilot"
+  config = Config(env_id, env_type="procgen")
+
+  config.update_every = 128
+  config.num_learn = 4
+  config.win_condition = 230
+  config.n_steps = 7e6
+  config.hidden_size = 512
+  config.lr = 2.5e-4
+  config.lr_annealing = True
+  config.epsilon_annealing = True
+
+  config.memory = Memory
+  config.model = ActorCriticCnn
+
+  # config.init_wandb()
+
+  scores, average_scores = train(config, config.env) 
+
 def runAtari():
   env_id = "BreakoutNoFrameskip-v4"
-  config = Config(env_id, atari=True)
+  config = Config(env_id, env_type="atari")
 
   config.update_every = 128
   config.num_learn = 4
@@ -34,7 +55,7 @@ def runAtari():
 
 def runGym():
   env_id = "CartPole-v1"
-  config = Config(env_id)
+  config = Config(env_id, env_type="gym")
 
   config.update_every = 256*4
   config.num_learn = 20
@@ -55,7 +76,7 @@ def runGym():
 def runLunarLander():
   env_id = "LunarLander-v2"
   
-  config = Config(env_id)
+  config = Config(env_id, env_type="gym")
 
   config.update_every = 256*4
   config.num_learn = 20
@@ -73,6 +94,6 @@ def runLunarLander():
 
   scores, average_scores = train(config, config.env)
 
-runAtari()
+runProcGen()
 
 

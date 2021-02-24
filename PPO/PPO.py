@@ -38,6 +38,7 @@ class PPO:
     self.mem.add(state, action, reward, log_prob, values, done)
 
   def act(self, x):
+    pdb.set_trace()
     x = x.to(self.config.device)
     return self.model_old.act(x)
   

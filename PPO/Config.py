@@ -4,23 +4,28 @@ import wandb
 import time
 import torch
 from envs import make_env, make_atari_env, VecPyTorch
+from procgen_env import make_procgen_env
 from stable_baselines3.common.vec_env import DummyVecEnv
 import random
 import numpy as np
 
 class Config:
-  def __init__(self, env_id, atari=False):
+  def __init__(self, env_id, env_type="gym"):
     self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Running experiment with device: {}".format(self.device))
     self.seed = 1
     self.num_env = 8
 
     self.env_id = env_id
-    if (atari):
+    if env_type == "atari":
       self.env  = VecPyTorch(DummyVecEnv([make_atari_env(self.env_id, self.seed+i, i) for i in range(self.num_env)]), self.device)
       self.state_space = self.env.observation_space.shape[0]
       self.action_space = self.env.action_space.n
-    else:
+    elif env_type == "procgen":
+      self.env = env = make_procgen_env(env_id, self.num_env, self.device)
+      self.state_space = self.env.observation_space.shape[0]
+      self.action_space = self.env.action_space.n
+    elif env_type == "gym":
       self.env = VecPyTorch(DummyVecEnv([make_env(self.env_id, self.seed+i, i) for i in range(self.num_env)]), self.device)
       self.state_space = self.env.observation_space.shape[0]
       self.action_space = self.env.action_space.n
