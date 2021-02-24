@@ -38,8 +38,10 @@ class PPO:
     self.mem.add(state, action, reward, log_prob, values, done)
 
   def act(self, x):
-    pdb.set_trace()
-    x = x.to(self.config.device)
+    if type(x) == np.ndarray:
+      x = torch.from_numpy(x).to(self.device)
+    else:
+      x = x.to(self.config.device)
     return self.model_old.act(x)
   
   def learn(self, num_learn, last_value, next_done, global_step):
