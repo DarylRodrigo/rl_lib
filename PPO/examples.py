@@ -15,12 +15,12 @@ import pdb
 
 def runProcGen():
   env_id = "starpilot"
-  config = Config(env_id, env_type="procgen")
+  config = Config(env_id, env_type="procgen", num_envs=64)
 
-  config.update_every = 128
-  config.num_learn = 4
+  config.update_every = 256
+  config.num_learn = 3
   config.win_condition = 230
-  config.n_steps = 7e6
+  config.n_steps = 1e8
   config.hidden_size = 512
   config.lr = 2.5e-4
   config.lr_annealing = True

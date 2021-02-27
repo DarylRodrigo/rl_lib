@@ -25,6 +25,7 @@ class PPO:
     self.epsilon = config.epsilon
     self.entropy_beta = config.entropy_beta
     self.device = config.device
+    self.mini_batch_size = config.mini_batch_size
 
     self.model = config.model(config).to(self.device)
     self.model_old = config.model(config).to(self.device)
@@ -62,7 +63,7 @@ class PPO:
     
     for i in range(num_learn):
       # itterate over mini_batches
-      for mini_batch_idx in self.mem.get_mini_batch_idxs(mini_batch_size=256):
+      for mini_batch_idx in self.mem.get_mini_batch_idxs(mini_batch_size=self.mini_batch_size):
 
         # Grab sample from memory
         prev_states, prev_actions, prev_log_probs, discounted_returns, advantage, prev_values = self.mem.sample(mini_batch_idx)
