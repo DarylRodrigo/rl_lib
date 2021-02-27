@@ -160,7 +160,7 @@ def test_sample_memory():
   
   last_value = torch.FloatTensor([0.0,0.0]).to(device)
   mem.calculate_advantage(last_value, [0,0])
-  s, a, lp, dr, adv = mem.sample([0,2,4])
+  s, a, lp, dr, adv, v = mem.sample([0,2,4])
   
   assert torch.equal(lp, torch.FloatTensor([1,3,5]))
   assert torch.allclose(dr, torch.FloatTensor([[0.9801,0.9900, 1]]))

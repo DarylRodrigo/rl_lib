@@ -3,22 +3,34 @@ from pprint import pprint
 import wandb
 import time
 import torch
-from envs import make_env, VecPyTorch
+from envs import make_env, make_atari_env, VecPyTorch
+from procgen_env import make_procgen_env
 from stable_baselines3.common.vec_env import DummyVecEnv
 import random
 import numpy as np
 
 class Config:
-  def __init__(self, env_id):
+  def __init__(self, env_id, env_type="gym", num_envs=8):
     self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    print("Running experiment with device: {}".format(self.device))
+    print("Running experiment {} -  on device: {}".format(env_id, self.device))
     self.seed = 1
-    self.num_env = 8
+    self.num_env = num_envs
 
     self.env_id = env_id
-    self.env = VecPyTorch(DummyVecEnv([make_env(env_id, self.seed+i, i) for i in range(self.num_env)]), self.device)
-    self.state_space = self.env.observation_space.shape[0]
-    self.action_space = self.env.action_space.n
+    if env_type == "atari":
+      self.env  = VecPyTorch(DummyVecEnv([make_atari_env(self.env_id, self.seed+i, i) for i in range(self.num_env)]), self.device)
+      self.state_space = self.env.observation_space.shape[0]
+      self.action_space = self.env.action_space.n
+      self.channels = 4
+    elif env_type == "procgen":
+      self.env = env = make_procgen_env(env_id, self.num_env, self.device)
+      self.state_space = self.env.observation_space.shape[0]
+      self.action_space = self.env.action_space.n
+      self.channels = 3
+    elif env_type == "gym":
+      self.env = VecPyTorch(DummyVecEnv([make_env(self.env_id, self.seed+i, i) for i in range(self.num_env)]), self.device)
+      self.state_space = self.env.observation_space.shape[0]
+      self.action_space = self.env.action_space.n
 
     self.win_condition = None
 
@@ -37,10 +49,9 @@ class Config:
     self.hidden_size = 64
 
     self.memory = None
+    self.mini_batch_size = 256
     self.gae = True
     self.gae_lambda = 0.95
-    self.batch_size = 64
-    self.buffer_size = int(1e5)
     self.lr_annealing = False
     self.epsilon_annealing = False
     self.learn_every = 4
@@ -66,9 +77,10 @@ class Config:
     pprint(vars(self))
   
   def init_wandb(self, project="rl-lib", entity="procgen"):
-    wandb.init(project="rl-lib", entity="procgen", sync_tensorboard=True)
+    wandb.init(project=project, entity=entity, sync_tensorboard=True)
 
     wandb.config.update({
+      "env_id": self.env_id,
       "seed": self.seed,
       "n_episodes": self.n_episodes,
       "max_t": self.max_t,
@@ -79,12 +91,12 @@ class Config:
       "gamma": self.gamma,
       "lr": self.lr,
       "hidden_size": self.hidden_size,
-      "batch_size": self.batch_size,
-      "buffer_size": self.buffer_size,
+      "mini_batch_size": self.mini_batch_size,
       "lr_annealing": self.lr_annealing,
       "learn_every": self.learn_every,
       "entropy_beta": self.entropy_beta,
-      "update_every": self.update_every
+      "update_every": self.update_every,
+      "num_learn": self.num_learn
     })
 
     self.wandb = True

@@ -26,7 +26,6 @@ class Memory:
     if (self.idx > self.size - 1):
       raise Exception("Memory out of space") 
     
-    # pdb.set_trace()
     self.states[self.idx] = states
     self.actions[self.idx] = actions
     self.rewards[self.idx] = torch.FloatTensor(rewards.reshape(-1)).to(self.device)

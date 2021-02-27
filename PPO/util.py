@@ -3,83 +3,30 @@ import gym
 import torch
 import numpy as np
 from collections import deque
-from PPO import PPOClassical, PPOPixel
+from PPO import PPO
 from Config import Config
 import pdb
 import wandb
-from envs import make_env, VecPyTorch
+from envs import make_atari_env, make_env, VecPyTorch
 from stable_baselines3.common.vec_env import DummyVecEnv
 
-def train(config):
-  env = copy.deepcopy(config.env)
-  steps = 0
-  scores_deque = deque(maxlen=100)
-  scores = []
-  average_scores = []
-  max_score = -np.Inf
-
-  agent = PPOClassical(config)
-  
-  if config.wandb:
-    wandb.watch(agent.model)
-
-  for i_episode in range(1, config.n_episodes+1):
-    state = env.reset()
-    score = 0
-    for t in range(config.max_t):
-      steps += 1
-
-      action, log_prob, values, _ = agent.act(torch.FloatTensor(state))
-      next_state, reward, done, _ = env.step(action.item())
-
-      agent.add_to_mem(state, action, reward, log_prob, values, done)
-
-      # Update 
-      state = next_state
-      score += reward
-
-      if steps >= config.update_every:
-        agent.learn(config.num_learn)
-        agent.mem.clear()
-        steps = 0
-
-      if done:
-        break 
-
-    # Book Keeping
-    scores_deque.append(score)
-    scores.append(score)
-    average_scores.append(np.mean(scores_deque))
-
-    if i_episode % 10 == 0:
-      print("\rEpisode {}	Average Score: {:.2f}	Score: {:.2f}".format(i_episode, np.mean(scores_deque), score), end="")
-    if i_episode % 100 == 0:
-      print("\rEpisode {}	Average Score: {:.2f}".format(i_episode, np.mean(scores_deque)))   
-
-    if np.mean(scores_deque) > config.win_condition:
-      print("\nEnvironment Solved!")
-      break
-
-  return scores, average_scores
-
-def train_pixel(config):
-  # env = config.env
-  envs = VecPyTorch(DummyVecEnv([make_env(config.env_id, config.seed+i, i) for i in range(config.num_env)]), config.device)
+def train(config, envs):
   scores_deque = deque(maxlen=100)
   scores = []
   average_scores = []
   global_step = 0
 
-  agent = PPOPixel(config)
+  agent = PPO(config)
 
+  states = envs.reset()
+  score = 0
+  values, dones = None, None
+  
   if config.wandb:
     wandb.watch(agent.model)
 
   while global_step < config.n_steps:
-    states = envs.reset()
-    score = 0
-    values, dones = None, None
-    
+
     while agent.mem.isFull() == False:
       global_step += config.num_env
 
@@ -90,10 +37,10 @@ def train_pixel(config):
 
       # Add to memory buffer
       agent.add_to_mem(states, actions, rewards, log_probs, values, dones)
+
       # Update state
       states = next_states
 
-      
       # Book Keeping
       for info in infos:
         if 'episode' in info:

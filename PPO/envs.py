@@ -305,7 +305,7 @@ class ImageToPyTorch(gym.ObservationWrapper):
 def wrap_pytorch(env):
     return ImageToPyTorch(env)
 
-    from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecEnvWrapper
+from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecEnvWrapper
 
 class VecPyTorch(VecEnvWrapper):
     def __init__(self, venv, device):
@@ -327,7 +327,7 @@ class VecPyTorch(VecEnvWrapper):
         reward = torch.from_numpy(reward).unsqueeze(dim=1).float()
         return obs, reward, done, info
 
-def make_env(gym_id, seed, idx):
+def make_atari_env(gym_id, seed, idx):
     def thunk():
         env = gym.make(gym_id)
         env = wrap_atari(env)
@@ -341,6 +341,17 @@ def make_env(gym_id, seed, idx):
                 scale=False,
             )
         )
+        env.seed(seed)
+        env.action_space.seed(seed)
+        env.observation_space.seed(seed)
+        return env
+    return thunk
+
+
+def make_env(gym_id, seed, idx):
+    def thunk():
+        env = gym.make(gym_id)
+        env = gym.wrappers.RecordEpisodeStatistics(env)
         env.seed(seed)
         env.action_space.seed(seed)
         env.observation_space.seed(seed)
