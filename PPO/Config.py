@@ -21,10 +21,12 @@ class Config:
       self.env  = VecPyTorch(DummyVecEnv([make_atari_env(self.env_id, self.seed+i, i) for i in range(self.num_env)]), self.device)
       self.state_space = self.env.observation_space.shape[0]
       self.action_space = self.env.action_space.n
+      self.channels = 4
     elif env_type == "procgen":
       self.env = env = make_procgen_env(env_id, self.num_env, self.device)
       self.state_space = self.env.observation_space.shape[0]
       self.action_space = self.env.action_space.n
+      self.channels = 3
     elif env_type == "gym":
       self.env = VecPyTorch(DummyVecEnv([make_env(self.env_id, self.seed+i, i) for i in range(self.num_env)]), self.device)
       self.state_space = self.env.observation_space.shape[0]

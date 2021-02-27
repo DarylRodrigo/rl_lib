@@ -2,7 +2,7 @@ import functools
 import gym
 from Config import Config
 from util import train
-from Models import ActorCritic, ActorCriticCnn
+from Models import ActorCritic, ActorCriticCnn, ActorCriticCnnProcGen
 from Networks import cnn_head_model, actor_model, critic_model, head_model
 from Memory import Memory
 from envs import make_atari_env, make_env, VecPyTorch
@@ -27,7 +27,7 @@ def runProcGen():
   config.epsilon_annealing = True
 
   config.memory = Memory
-  config.model = ActorCriticCnn
+  config.model = ActorCriticCnnProcGen
 
   # config.init_wandb()
 
@@ -95,5 +95,6 @@ def runLunarLander():
   scores, average_scores = train(config, config.env)
 
 runProcGen()
+# runAtari()
 
 

@@ -76,6 +76,29 @@ class VecMonitor(VecEnvWrapper):
         self.eplens[i] = 0
         newinfos[i] = info
     return obs, rews, dones, newinfos
+  
+class ImageToPyTorch(gym.ObservationWrapper):
+  """
+  Image shape to channels x weight x height
+  """
+
+  def __init__(self, env):
+    super(ImageToPyTorch, self).__init__(env)
+    old_shape = self.observation_space.shape
+    self.observation_space = gym.spaces.Box(
+      low=0,
+      high=255,
+      shape=(old_shape[-1], old_shape[0], old_shape[1]),
+      dtype=np.uint8,
+    )
+
+  def observation(self, observation):
+    return np.transpose(observation, axes=(2, 0, 1))
+
+
+def wrap_pytorch(env):
+  return ImageToPyTorch(env)
+
 
 def make_procgen_env(env_name, num_envs, device):
     venv = ProcgenEnv(env_name=env_name, num_envs=num_envs, distribution_mode="easy", num_levels=0, start_level=0)
@@ -84,4 +107,4 @@ def make_procgen_env(env_name, num_envs, device):
     envs = VecNormalize(venv=venv, norm_obs=False)
     envs = VecPyTorch(envs, device)
     # VecVideoRecorder(envs, f'videos/{experiment_name}', record_video_trigger=lambda x: x % 1000000== 0, video_length=100)
-    return venv
+    return envs
