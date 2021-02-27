@@ -14,7 +14,7 @@ import pdb
 
 
 def runProcGen():
-  env_id = "starpilot"
+  env_id = "coinrun"
   config = Config(env_id, env_type="procgen", num_envs=64)
 
   config.update_every = 256
@@ -29,7 +29,7 @@ def runProcGen():
   config.memory = Memory
   config.model = ActorCriticCnnProcGen
 
-  # config.init_wandb()
+  config.init_wandb()
 
   scores, average_scores = train(config, config.env) 
 
@@ -49,7 +49,7 @@ def runAtari():
   config.memory = Memory
   config.model = ActorCriticCnn
 
-  # config.init_wandb()
+  config.init_wandb()
 
   scores, average_scores = train(config, config.env)
 
@@ -69,7 +69,7 @@ def runGym():
   config.memory = Memory
   config.model = ActorCritic
 
-  # config.init_wandb(project="gym", entity="procgen")
+  config.init_wandb(project="gym", entity="procgen")
 
   scores, average_scores = train(config, config.env)
 
@@ -93,8 +93,5 @@ def runLunarLander():
   config.init_wandb(project="gym", entity="procgen")
 
   scores, average_scores = train(config, config.env)
-
-runProcGen()
-# runAtari()
 
 
